@@ -27,7 +27,6 @@ def get_auth_url(state: str) -> str:
         "redirect_uri": settings.spotify_redirect_uri,
         "scope": SCOPES,
         "state": state,
-        "show_dialog": "true",
     }
     return f"{SPOTIFY_AUTH_URL}?{urlencode(params)}"
 
