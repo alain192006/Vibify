@@ -166,6 +166,24 @@ async def get_tracks_details(track_ids: list[str]) -> list[dict]:
     return results
 
 
+async def get_audio_features(track_ids: list[str]) -> list[dict]:
+    if not track_ids:
+        return []
+    token = await get_client_token()
+    results = []
+    async with httpx.AsyncClient() as client:
+        for i in range(0, len(track_ids), 100):
+            batch = track_ids[i:i + 100]
+            r = await client.get(
+                f"{SPOTIFY_API}/audio-features",
+                headers={"Authorization": f"Bearer {token}"},
+                params={"ids": ",".join(batch)},
+            )
+            if r.is_success:
+                results.extend(f for f in (r.json().get("audio_features") or []) if f)
+    return results
+
+
 async def add_tracks(access_token: str, playlist_id: str, uris: list[str]) -> None:
     headers = {
         "Authorization": f"Bearer {access_token}",

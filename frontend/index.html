@@ -5,6 +5,12 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Vibify</title>
   <link rel="stylesheet" href="/static/style.css">
+  <link rel="manifest" href="/static/manifest.json">
+  <meta name="theme-color" content="#1db954">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black">
+  <meta name="apple-mobile-web-app-title" content="Vibify">
+  <link rel="apple-touch-icon" href="/static/icons/icon.svg">
 </head>
 <body>
 
@@ -21,8 +27,30 @@
 
   <!-- IMPORT SCREEN -->
   <div id="import-screen" class="import-screen">
+    <!-- Decorative background icons -->
+    <div class="bg-decos" aria-hidden="true">
+      <span class="bg-deco" style="left:3%;top:12%;font-size:5rem;--dur:8s;--delay:0s;--rot:-12deg">🎵</span>
+      <span class="bg-deco" style="left:7%;top:60%;font-size:3.5rem;--dur:11s;--delay:1.5s;--rot:18deg">🎧</span>
+      <span class="bg-deco" style="left:2%;top:80%;font-size:4rem;--dur:9s;--delay:0.5s;--rot:-8deg">🎸</span>
+      <span class="bg-deco" style="left:13%;top:35%;font-size:2.5rem;--dur:13s;--delay:2s;--rot:25deg">🎹</span>
+      <span class="bg-deco" style="left:88%;top:10%;font-size:4.5rem;--dur:10s;--delay:0.8s;--rot:15deg">🎺</span>
+      <span class="bg-deco" style="left:83%;top:45%;font-size:3rem;--dur:7s;--delay:2.5s;--rot:-20deg">🥁</span>
+      <span class="bg-deco" style="left:90%;top:72%;font-size:5rem;--dur:12s;--delay:1s;--rot:10deg">🎷</span>
+      <span class="bg-deco" style="left:78%;top:85%;font-size:2.8rem;--dur:9s;--delay:3s;--rot:-15deg">🎻</span>
+      <span class="bg-deco" style="left:50%;top:5%;font-size:3rem;--dur:14s;--delay:0.3s;--rot:5deg">🎙️</span>
+      <span class="bg-deco" style="left:20%;top:88%;font-size:3.5rem;--dur:8s;--delay:1.8s;--rot:-22deg">🎼</span>
+    </div>
     <div class="import-card">
-      <div class="logo">🎵 Vibify</div>
+      <div class="logo">
+        <svg class="logo-svg" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 160 40" fill="none" height="48">
+          <rect class="logo-bar" x="0"  y="20" width="10" height="20" rx="5" fill="#1db954"/>
+          <rect class="logo-bar" x="14" y="8"  width="10" height="32" rx="5" fill="#1db954"/>
+          <rect class="logo-bar" x="28" y="14" width="10" height="26" rx="5" fill="#1db954"/>
+          <rect class="logo-bar" x="42" y="2"  width="10" height="38" rx="5" fill="#1db954"/>
+          <rect class="logo-bar" x="56" y="16" width="10" height="24" rx="5" fill="#1db954"/>
+          <text x="76" y="29" font-family="-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif" font-size="22" font-weight="800" fill="white" letter-spacing="-0.5">Vibify</text>
+        </svg>
+      </div>
       <p class="tagline">Trie et organise ta musique Spotify</p>
 
       <div id="saved-banner" class="saved-banner hidden">
@@ -43,18 +71,20 @@
             <li>Tu reçois un ZIP par e-mail (quelques min à quelques heures)</li>
             <li>Dézippe et glisse les fichiers JSON ci-dessous 👇</li>
           </ol>
-          <p class="file-tip">📄 Cherche : <code>YourLibrary.json</code> + <code>Playlist1.json</code>, <code>Playlist2.json</code>…</p>
+          <p class="file-tip">📄 Glisse directement le <code>.zip</code> Spotify, ou les fichiers <code>YourLibrary.json</code> + <code>Playlist1.json</code>…</p>
         </div>
         <div id="drop-zone" class="drop-zone">
           <div class="drop-icon">📁</div>
-          <p>Glisse tes fichiers JSON ici</p>
+          <p>Glisse tes fichiers JSON ou le ZIP Spotify ici</p>
           <span class="drop-or">ou</span>
           <label class="import-label">
             Choisir les fichiers
-            <input type="file" id="file-input" accept=".json" multiple hidden>
+            <input type="file" id="file-input" accept=".json,.zip" multiple hidden>
           </label>
         </div>
         <p id="import-error" class="import-error hidden"></p>
+        <div class="demo-divider"><span>ou</span></div>
+        <button id="demo-btn" class="btn-demo">🎮 Tester avec des données démo</button>
       </div>
     </div>
   </div>
@@ -63,12 +93,30 @@
   <div id="app-screen" class="app-screen hidden">
 
     <header class="header">
-      <div class="header-logo">🎵 Vibify</div>
+      <div class="header-logo">
+        <svg class="header-logo-svg" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 160 40" fill="none" height="26">
+          <rect class="logo-bar" x="0"  y="20" width="10" height="20" rx="5" fill="#1db954"/>
+          <rect class="logo-bar" x="14" y="8"  width="10" height="32" rx="5" fill="#1db954"/>
+          <rect class="logo-bar" x="28" y="14" width="10" height="26" rx="5" fill="#1db954"/>
+          <rect class="logo-bar" x="42" y="2"  width="10" height="38" rx="5" fill="#1db954"/>
+          <rect class="logo-bar" x="56" y="16" width="10" height="24" rx="5" fill="#1db954"/>
+          <text x="76" y="29" font-family="-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif" font-size="22" font-weight="800" fill="currentColor" letter-spacing="-0.5">Vibify</text>
+        </svg>
+      </div>
       <div class="header-actions">
         <span id="import-info" class="import-info"></span>
-        <button id="stats-btn"  class="btn-icon">📊 Stats</button>
+        <button id="history-btn" class="btn-icon hidden">📈 Historique</button>
+        <button id="compare-btn" class="btn-icon">👥 Comparer</button>
+        <button id="backup-btn"  class="btn-icon">💾 Backup</button>
+        <button id="stats-btn"   class="btn-icon">📊 Stats</button>
         <button id="view-btn"   class="btn-icon">⊞ Grille</button>
         <button id="theme-btn"  class="btn-icon">☀️</button>
+        <div id="spotify-user-wrap" class="spotify-user-wrap hidden">
+          <img id="spotify-avatar" class="spotify-avatar" src="" alt="">
+          <span id="spotify-user-name" class="spotify-user-name"></span>
+          <button id="spotify-disconnect-btn" class="btn-outline-sm">✕</button>
+        </div>
+        <button id="spotify-connect-btn" class="btn-spotify">🎵 Spotify</button>
         <button id="new-import-btn" class="btn-outline-sm">↩ Import</button>
       </div>
     </header>
@@ -82,6 +130,27 @@
         <div id="sidebar-bottom" class="sidebar-bottom hidden">
           <button id="fusion-btn" class="btn-primary fusion-full">🔀 Fusionner</button>
         </div>
+
+  <!-- FUSION MODAL -->
+  <div id="fusion-modal" class="modal hidden">
+    <div class="modal-box">
+      <div class="modal-header">
+        <h3>🔀 Fusionner les playlists</h3>
+        <button id="close-fusion-modal-btn" class="modal-close">✕</button>
+      </div>
+      <p id="fusion-modal-info" class="modal-info"></p>
+      <label class="fusion-option">
+        <input type="checkbox" id="fusion-dedup" checked>
+        Supprimer les doublons
+      </label>
+      <input type="text" id="fusion-pl-name" class="search-input" placeholder="Nom de la playlist fusionnée…" maxlength="100" style="width:100%;margin-top:12px">
+      <div class="fusion-modal-btns">
+        <button id="fusion-view-btn" class="btn-secondary">👁 Voir dans Vibify</button>
+        <button id="fusion-spotify-btn" class="btn-spotify">🎵 Créer sur Spotify</button>
+      </div>
+      <div id="fusion-result"></div>
+    </div>
+  </div>
       </aside>
 
       <!-- MAIN -->
@@ -94,6 +163,21 @@
           </div>
           <div class="toolbar-btns">
             <button id="shuffle-btn" class="btn-icon" title="Mélanger">🔀 Shuffle</button>
+            <button id="map-btn"       class="btn-icon">🗺️ Carte</button>
+            <button id="quiz-btn"      class="btn-icon">🎮 Quiz</button>
+            <button id="roulette-btn"  class="btn-icon">🎲 Roulette</button>
+            <button id="mosaic-btn"    class="btn-icon">🎨 Mosaïque</button>
+            <div class="flow-wrap">
+              <button id="flow-btn"    class="btn-icon">🌊 Flow ▾</button>
+              <div id="flow-menu" class="flow-menu hidden">
+                <button data-mode="ascending">⬆ Énergie croissante</button>
+                <button data-mode="descending">⬇ Énergie décroissante</button>
+                <button data-mode="wave">〰 Vague (doux→fort→doux)</button>
+                <button data-mode="bpm">🥁 Par BPM</button>
+              </div>
+            </div>
+            <button id="coh-btn"     class="btn-icon">🎯 Cohérence</button>
+            <button id="split-btn"   class="btn-icon">✂️ Diviser</button>
             <button id="dup-btn"     class="btn-outline-sm">🔍 Doublons</button>
           </div>
         </div>
@@ -109,6 +193,9 @@
                 <option value="album">Album</option>
                 <option value="duration_ms">Durée</option>
                 <option value="added_at">Date ajoutée</option>
+                <option value="rating">⭐ Note</option>
+                <option value="energy">⚡ Énergie</option>
+                <option value="tempo">🥁 BPM</option>
               </select>
               <select id="sort-order">
                 <option value="asc">↑ A→Z</option>
@@ -121,6 +208,32 @@
             <div class="filter-group">
               <select id="artist-select"><option value="">🎤 Artiste…</option></select>
               <select id="album-select"><option value="">💿 Album…</option></select>
+              <select id="tag-select"><option value="">🏷️ Tag…</option></select>
+              <select id="decade-select">
+                <option value="">🕐 Décennie…</option>
+                <option value="1980">📼 80s</option>
+                <option value="1990">💿 90s</option>
+                <option value="2000">📱 2000s</option>
+                <option value="2010">📸 2010s</option>
+                <option value="2020">🌐 2020s</option>
+              </select>
+              <select id="year-select"><option value="">📅 Année…</option></select>
+              <select id="rating-select">
+                <option value="">⭐ Note…</option>
+                <option value="1">1★+</option>
+                <option value="2">2★+</option>
+                <option value="3">3★+</option>
+                <option value="4">4★+</option>
+                <option value="5">5★ seulement</option>
+              </select>
+              <select id="mood-select">
+                <option value="">🎭 Mood…</option>
+                <option value="energique">⚡ Énergique</option>
+                <option value="calme">😌 Calme</option>
+                <option value="dansant">💃 Dansant</option>
+                <option value="melancolique">😢 Mélancolique</option>
+                <option value="positif">😊 Positif</option>
+              </select>
             </div>
             <div class="filter-actions">
               <button id="reset-btn" class="btn-secondary">Reset</button>
@@ -140,8 +253,11 @@
     <div id="float-bar" class="float-bar">
       <span id="float-count" class="float-count"></span>
       <div class="float-actions">
+        <button id="float-dj-btn"   class="btn-icon">🎧 File DJ</button>
+        <button id="float-tag-btn"  class="btn-icon">🏷️ Tagger</button>
         <button id="float-copy-btn" class="btn-icon">📋 Copier URIs</button>
         <button id="float-csv-btn"  class="btn-icon">⬇ CSV</button>
+        <button id="float-create-btn" class="btn-spotify hidden">＋ Playlist Spotify</button>
         <button id="float-clear-btn" class="btn-outline-sm">✕ Désélectionner</button>
       </div>
     </div>
@@ -173,11 +289,218 @@
     </div>
   </div>
 
+  <!-- CREATE PLAYLIST MODAL -->
+  <div id="create-pl-modal" class="modal hidden">
+    <div class="modal-box">
+      <div class="modal-header">
+        <h3>🎵 Créer sur Spotify</h3>
+        <button id="close-create-pl-btn" class="modal-close">✕</button>
+      </div>
+      <p id="create-pl-info" class="modal-info"></p>
+      <input type="text" id="create-pl-name" class="search-input" placeholder="Nom de la playlist…" maxlength="100" style="width:100%">
+      <button id="create-pl-confirm" class="btn-primary" style="width:100%">Créer sur Spotify ✓</button>
+      <div id="create-pl-result"></div>
+    </div>
+  </div>
+
+  <!-- TAG MODAL -->
+  <div id="tag-modal" class="modal hidden">
+    <div class="modal-box">
+      <div class="modal-header">
+        <h3>🏷️ Tags</h3>
+        <button id="close-tag-btn" class="modal-close">✕</button>
+      </div>
+      <p id="tag-track-name" class="modal-info"></p>
+      <div id="tag-chips-wrap" class="tag-chips-wrap"></div>
+      <div class="tag-input-wrap">
+        <input type="text" id="tag-input" class="search-input" placeholder="Nouveau tag… (ex: gym, chill)" maxlength="25">
+        <button id="tag-confirm-btn" class="btn-primary">+</button>
+      </div>
+      <div id="tag-suggestions" class="tag-suggestions"></div>
+    </div>
+  </div>
+
+  <!-- DJ PLAYER -->
+  <div id="dj-player" class="dj-player hidden">
+    <div id="dj-art-wrap" class="dj-art-wrap">
+      <img id="dj-art" class="dj-art" src="" alt="">
+    </div>
+    <div class="dj-info">
+      <div id="dj-title"  class="dj-title">—</div>
+      <div id="dj-artist" class="dj-artist">—</div>
+    </div>
+    <div class="dj-controls">
+      <button id="dj-prev-btn" class="dj-btn">⏮</button>
+      <button id="dj-play-btn" class="dj-btn dj-play-btn">▶</button>
+      <button id="dj-next-btn" class="dj-btn">⏭</button>
+    </div>
+    <div class="dj-progress-section">
+      <div class="dj-progress-times">
+        <span id="dj-time">0:00</span>
+        <span id="dj-duration">0:30</span>
+      </div>
+      <div id="dj-progress-bar" class="dj-progress-bar">
+        <div id="dj-progress-fill" class="dj-progress-fill"></div>
+      </div>
+    </div>
+    <div class="dj-right">
+      <span id="dj-count" class="dj-count"></span>
+      <button id="dj-queue-btn" class="dj-btn" title="File d'attente">☰</button>
+      <button id="dj-close-btn" class="dj-btn" title="Fermer DJ">✕</button>
+    </div>
+  </div>
+
+  <!-- DJ QUEUE PANEL -->
+  <div id="dj-queue-panel" class="dj-queue-panel hidden">
+    <div class="dj-queue-header">
+      <h3>🎧 File d'attente</h3>
+      <button id="dj-shuffle-queue-btn" class="btn-icon">🔀</button>
+      <button id="dj-clear-queue-btn"   class="btn-outline-sm">Vider</button>
+      <button id="dj-close-queue-btn"   class="modal-close">✕</button>
+    </div>
+    <div id="dj-queue-list" class="dj-queue-list"></div>
+  </div>
+
+  <!-- HISTORY MODAL -->
+  <div id="history-modal" class="modal hidden">
+    <div class="modal-box modal-wide">
+      <div class="modal-header">
+        <h3>📈 Ton Historique d'écoute</h3>
+        <button id="close-history-btn" class="modal-close">✕</button>
+      </div>
+      <div id="history-body"></div>
+    </div>
+  </div>
+
+  <!-- COMPATIBILITY MODAL -->
+  <div id="compat-modal" class="modal hidden">
+    <div class="modal-box modal-wide">
+      <div class="modal-header">
+        <h3>👥 Compatibilité Musicale</h3>
+        <button id="close-compat-btn" class="modal-close">✕</button>
+      </div>
+      <div id="compat-body">
+        <div class="compat-intro">
+          <p class="modal-info">Compare ta bibliothèque avec celle d'un ami pour découvrir votre compatibilité musicale !</p>
+          <div class="compat-steps">
+            <div class="compat-step">
+              <div class="compat-step-num">1</div>
+              <div>
+                <strong>Exporte ton profil</strong>
+                <p>Génère un fichier que tu envoies à ton ami</p>
+                <button id="export-profile-btn" class="btn-primary">⬇ Exporter mon profil</button>
+              </div>
+            </div>
+            <div class="compat-step">
+              <div class="compat-step-num">2</div>
+              <div>
+                <strong>Importe le profil de ton ami</strong>
+                <p>Il t'envoie son fichier, tu le charge ici</p>
+                <label class="import-label" style="font-size:.85rem;padding:8px 18px">
+                  📂 Charger profil ami
+                  <input type="file" id="friend-profile-input" accept=".json" hidden>
+                </label>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div id="compat-result"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- WHERE IS THIS TRACK MODAL -->
+  <div id="where-modal" class="modal hidden">
+    <div class="modal-box">
+      <div class="modal-header">
+        <h3>🔍 Où est ce titre ?</h3>
+        <button id="close-where-btn" class="modal-close">✕</button>
+      </div>
+      <p id="where-track-name" class="modal-info"></p>
+      <div id="where-body"></div>
+    </div>
+  </div>
+
+  <!-- SPLIT MODAL -->
+  <div id="split-modal" class="modal hidden">
+    <div class="modal-box modal-wide">
+      <div class="modal-header">
+        <h3>✂️ Diviser la playlist</h3>
+        <button id="close-split-btn" class="modal-close">✕</button>
+      </div>
+      <p class="modal-info">Sépare ta sélection actuelle en sous-playlists, et crée-les directement sur Spotify.</p>
+      <div class="split-options">
+        <button class="split-opt active" data-by="artist">🎤 Par artiste</button>
+        <button class="split-opt" data-by="decade">🕐 Par décennie</button>
+        <button class="split-opt" data-by="mood">🎭 Par mood</button>
+      </div>
+      <div id="split-preview"></div>
+      <div id="split-actions" class="split-actions hidden">
+        <button id="split-spotify-btn" class="btn-spotify">🎵 Créer toutes sur Spotify</button>
+        <span id="split-spotify-status"></span>
+      </div>
+    </div>
+  </div>
+
+  <!-- QUIZ MODAL -->
+  <div id="quiz-modal" class="modal hidden">
+    <div class="modal-box quiz-box">
+      <div class="quiz-header">
+        <span id="quiz-progress">Question 1/10</span>
+        <div class="quiz-timer-bar"><div id="quiz-timer-fill" class="quiz-timer-fill"></div></div>
+        <span id="quiz-score-display">0 pts</span>
+        <button id="close-quiz-btn" class="modal-close">✕</button>
+      </div>
+      <div id="quiz-content"></div>
+    </div>
+  </div>
+
+  <!-- ROULETTE MODAL -->
+  <div id="roulette-modal" class="modal hidden">
+    <div class="modal-box roulette-box">
+      <button id="close-roulette-btn" class="modal-close" style="position:absolute;top:14px;right:14px">✕</button>
+      <div id="roulette-content"></div>
+      <div class="roulette-actions">
+        <button id="roulette-play-btn"   class="btn-icon">▶ Preview</button>
+        <button id="roulette-select-btn" class="btn-primary">＋ Sélectionner</button>
+        <button id="roulette-again-btn"  class="btn-spotify">🎲 Encore</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- MOSAIC MODAL -->
+  <div id="mosaic-modal" class="modal hidden">
+    <div class="modal-box modal-wide">
+      <div class="modal-header">
+        <h3>🎨 Mosaïque de pochettes</h3>
+        <button id="close-mosaic-btn" class="modal-close">✕</button>
+      </div>
+      <div id="mosaic-content" class="mosaic-content"></div>
+      <button id="download-mosaic-btn" class="btn-primary" style="width:100%;margin-top:12px">⬇ Télécharger PNG</button>
+    </div>
+  </div>
+
+  <!-- MAP MODAL -->
+  <div id="map-modal" class="modal hidden">
+    <div class="modal-box modal-map">
+      <div class="modal-header">
+        <h3>🗺️ Carte Musicale</h3>
+        <button id="close-map-btn" class="modal-close">✕</button>
+      </div>
+      <p class="modal-info" style="margin-bottom:8px">Chaque point = un titre. Clique pour sélectionner.</p>
+      <canvas id="map-canvas" class="map-canvas"></canvas>
+    </div>
+  </div>
+
+  <!-- MAP TOOLTIP -->
+  <div id="map-tooltip" class="map-tooltip"></div>
+
   <!-- SHORTCUTS HINT -->
   <div id="shortcuts-toast" class="shortcuts-toast hidden">
     <strong>Raccourcis :</strong> Ctrl+A Tout sélectionner · Ctrl+F Rechercher · Esc Fermer
   </div>
 
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
   <script src="/static/app.js"></script>
 </body>
 </html>

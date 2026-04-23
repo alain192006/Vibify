@@ -33,6 +33,24 @@ class EnrichBody(BaseModel):
     ids: list[str]
 
 
+@router.post("/audio-features")
+async def audio_features(body: EnrichBody):
+    try:
+        features = await sp.get_audio_features(body.ids)
+        return [
+            {
+                "id": f["id"],
+                "energy": round(f.get("energy", 0), 3),
+                "danceability": round(f.get("danceability", 0), 3),
+                "valence": round(f.get("valence", 0), 3),
+                "tempo": round(f.get("tempo", 0)),
+            }
+            for f in features if f and f.get("id")
+        ]
+    except Exception:
+        return []
+
+
 @router.post("/enrich")
 async def enrich_tracks(body: EnrichBody):
     try:
