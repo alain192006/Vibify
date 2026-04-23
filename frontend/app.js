@@ -853,6 +853,22 @@ function renderSidebar() {
     allBtn.click();
   }
 
+  // Section artistes
+  const allForArtists = [...library.liked, ...library.playlists.flatMap(p => p.items)];
+  const artistMap = {};
+  allForArtists.forEach(t => (t.artists||[]).forEach(a => { if (a) { if (!artistMap[a]) artistMap[a] = []; artistMap[a].push(t); } }));
+  const topArtistEntries = Object.entries(artistMap).sort((a,b)=>b[1].length-a[1].length).slice(0,15);
+  if (topArtistEntries.length) {
+    const artistSep = document.createElement('div');
+    artistSep.className = 'sidebar-title'; artistSep.style.padding = '12px 16px 6px'; artistSep.textContent = 'Artistes';
+    list.appendChild(artistSep);
+    topArtistEntries.forEach(([artist, tracks]) => {
+      const btn = makeSrcBtn('🎤', artist, tracks.length);
+      btn.addEventListener('click', () => { setActive(btn); loadSource(artist, tracks); });
+      list.appendChild(btn);
+    });
+  }
+
   if (library.playlists.length) {
     const sep = document.createElement('div');
     sep.className = 'sidebar-title'; sep.style.padding = '12px 16px 6px'; sep.textContent = 'Playlists';
@@ -1022,7 +1038,7 @@ function renderTracks(tracks) {
         </div>`;
       attachToggle(card, card.querySelector('.track-check'), t);
       const cpb = t.preview_url ? card.querySelector('.card-play-btn') : null;
-      if (cpb) cpb.addEventListener('click', e => { e.stopPropagation(); playPreview(t.preview_url, cpb, card); });
+      if (cpb) cpb.addEventListener('click', e => { e.stopPropagation(); playPreview(t.preview_url, cpb, card, t); });
       const csl = card.querySelector('.card-spotify-link');
       if (csl) csl.addEventListener('click', e => e.stopPropagation());
       card.querySelector('.tag-edit-btn').addEventListener('click', e => { e.stopPropagation(); showTagModal(t.uri, t.name); });
@@ -1069,7 +1085,7 @@ function renderTracks(tracks) {
         </div>`;
       attachToggle(row, row.querySelector('.track-check'), t);
       const pb = t.preview_url ? row.querySelector('.preview-play-btn') : null;
-      if (pb) pb.addEventListener('click', e => { e.stopPropagation(); playPreview(t.preview_url, pb, row); });
+      if (pb) pb.addEventListener('click', e => { e.stopPropagation(); playPreview(t.preview_url, pb, row, t); });
       const sl = row.querySelector('.open-spotify-btn');
       if (sl) sl.addEventListener('click', e => e.stopPropagation());
       row.querySelector('.tag-edit-btn').addEventListener('click', e => { e.stopPropagation(); showTagModal(t.uri, t.name); });
@@ -1102,7 +1118,9 @@ function updateFloatBar() {
   }
 }
 
-function playPreview(url, btn, row) {
+let miniPlayerTimer = null;
+
+function playPreview(url, btn, row, track) {
   if (currentAudio) {
     currentAudio.pause();
     if (currentPlayBtn) currentPlayBtn.textContent = '▶';
@@ -1110,18 +1128,40 @@ function playPreview(url, btn, row) {
     currentPlayBtn?.closest('.track-card')?.classList.remove('playing');
     const wasBtn = currentPlayBtn;
     currentAudio = null; currentPlayBtn = null;
-    if (wasBtn === btn) return;
+    if (wasBtn === btn) { hideMiniPlayer(); return; }
   }
   currentAudio = new Audio(url);
   currentPlayBtn = btn;
   btn.textContent = '⏸';
   row?.classList.add('playing');
+  showMiniPlayer(track);
   currentAudio.play().catch(() => {});
+  currentAudio.addEventListener('timeupdate', () => {
+    const pct = currentAudio.duration ? (currentAudio.currentTime / currentAudio.duration * 100) : 0;
+    $('mini-player-progress').style.width = pct + '%';
+  });
   currentAudio.addEventListener('ended', () => {
     btn.textContent = '▶';
     row?.classList.remove('playing');
     currentAudio = null; currentPlayBtn = null;
+    hideMiniPlayer();
   });
+}
+
+function showMiniPlayer(track) {
+  const img = $('mini-player-img');
+  const ph  = $('mini-player-placeholder');
+  if (track?.image) { img.src = track.image; img.classList.remove('hidden'); ph.classList.add('hidden'); }
+  else              { img.classList.add('hidden'); ph.classList.remove('hidden'); }
+  $('mini-player-name').textContent   = track?.name || '';
+  $('mini-player-artist').textContent = (track?.artists||[]).join(', ');
+  $('mini-player-progress').style.width = '0%';
+  $('mini-player').classList.remove('hidden');
+}
+
+function hideMiniPlayer() {
+  $('mini-player').classList.add('hidden');
+  $('mini-player-progress').style.width = '0%';
 }
 
 function clearSelection() {
@@ -2410,6 +2450,17 @@ document.addEventListener('DOMContentLoaded', () => {
   $('search-select-all-btn').addEventListener('click', searchSelectAll);
 
   $('close-stats-btn').addEventListener('click', () => $('stats-modal').classList.add('hidden'));
+
+  $('mini-player-btn').addEventListener('click', () => {
+    if (!currentAudio) return;
+    if (currentAudio.paused) { currentAudio.play(); $('mini-player-btn').textContent = '⏸'; if (currentPlayBtn) currentPlayBtn.textContent = '⏸'; }
+    else { currentAudio.pause(); $('mini-player-btn').textContent = '▶'; if (currentPlayBtn) currentPlayBtn.textContent = '▶'; }
+  });
+  $('mini-player-close').addEventListener('click', () => {
+    if (currentAudio) { currentAudio.pause(); currentAudio = null; }
+    if (currentPlayBtn) { currentPlayBtn.textContent = '▶'; currentPlayBtn = null; }
+    hideMiniPlayer();
+  });
   $('close-export-btn').addEventListener('click', () => $('export-modal').classList.add('hidden'));
   $('copy-uris-btn').addEventListener('click', copyUris);
   $('export-csv-btn').addEventListener('click', exportCsv);
