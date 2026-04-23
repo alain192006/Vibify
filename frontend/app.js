@@ -1190,7 +1190,85 @@ function showStats() {
           ${d ? `<span class="pl-stat-dups">⚠ ${d} doublon${d>1?'s':''}</span>` : '<span></span>'}
         </div>`;
       }).join('')}
-    </div>` : ''}`;
+    </div>` : ''}
+    ${(() => {
+      // Top albums
+      const albumCounts = {};
+      all.forEach(t => { if (t.album) albumCounts[t.album] = (albumCounts[t.album]||0)+1; });
+      const topAlbums = Object.entries(albumCounts).sort((a,b)=>b[1]-a[1]).slice(0,6);
+      const maxA = topAlbums[0]?.[1] || 1;
+      if (!topAlbums.length) return '';
+      return `<div class="stat-section-title" style="margin-top:14px">Top albums</div>
+      <div class="top-list">
+        ${topAlbums.map(([a,n])=>`
+          <div class="top-row">
+            <span class="top-name">${esc(a)}</span>
+            <div class="top-bar-wrap"><div class="top-bar" style="width:${Math.round(n/maxA*100)}%;background:#a78bfa"></div></div>
+            <span class="top-count">${n} titre${n>1?'s':''}</span>
+          </div>`).join('')}
+      </div>`;
+    })()}
+    ${(() => {
+      // Decade distribution
+      const decades = {};
+      all.forEach(t => {
+        const y = parseInt((t.added_at||'').slice(0,4));
+        if (y >= 1950) { const d = Math.floor(y/10)*10; decades[d] = (decades[d]||0)+1; }
+      });
+      const entries = Object.entries(decades).sort((a,b)=>a[0]-b[0]);
+      if (!entries.length) return '';
+      const maxD = Math.max(...entries.map(e=>e[1]));
+      return `<div class="stat-section-title" style="margin-top:14px">Répartition par décennie</div>
+      <div class="top-list">
+        ${entries.map(([d,n])=>`
+          <div class="top-row">
+            <span class="top-name">${d}s</span>
+            <div class="top-bar-wrap"><div class="top-bar" style="width:${Math.round(n/maxD*100)}%;background:#60a5fa"></div></div>
+            <span class="top-count">${n}</span>
+          </div>`).join('')}
+      </div>`;
+    })()}
+    ${(() => {
+      // Ratings distribution
+      const rated = all.filter(t => t.uri && ratings[t.uri]);
+      if (!rated.length) return '';
+      const dist = {1:0,2:0,3:0,4:0,5:0};
+      rated.forEach(t => dist[ratings[t.uri]]++);
+      const maxR = Math.max(...Object.values(dist));
+      return `<div class="stat-section-title" style="margin-top:14px">Distribution des notes (${rated.length} notés)</div>
+      <div class="top-list">
+        ${[5,4,3,2,1].map(s=>`
+          <div class="top-row">
+            <span class="top-name">${'★'.repeat(s)}${'☆'.repeat(5-s)}</span>
+            <div class="top-bar-wrap"><div class="top-bar" style="width:${maxR?Math.round(dist[s]/maxR*100):0}%;background:#fbbf24"></div></div>
+            <span class="top-count">${dist[s]}</span>
+          </div>`).join('')}
+      </div>`;
+    })()}
+    ${(() => {
+      // Mood breakdown
+      const wf = all.filter(t => t.energy != null);
+      if (!wf.length) return '';
+      const moods = { '⚡ Énergique': 0, '😌 Calme': 0, '💃 Dansant': 0, '😢 Mélancolique': 0, '😊 Positif': 0 };
+      wf.forEach(t => {
+        if (t.energy > 0.65 && t.valence > 0.55) moods['⚡ Énergique']++;
+        else if (t.energy <= 0.4 && t.valence <= 0.4) moods['😢 Mélancolique']++;
+        else if (t.danceability > 0.7) moods['💃 Dansant']++;
+        else if (t.energy <= 0.4) moods['😌 Calme']++;
+        else moods['😊 Positif']++;
+      });
+      const maxM = Math.max(...Object.values(moods));
+      const colors = {'⚡ Énergique':'#ff6b6b','😌 Calme':'#60a5fa','💃 Dansant':'#a78bfa','😢 Mélancolique':'#94a3b8','😊 Positif':'#fbbf24'};
+      return `<div class="stat-section-title" style="margin-top:14px">Répartition des humeurs</div>
+      <div class="top-list">
+        ${Object.entries(moods).map(([m,n])=>`
+          <div class="top-row">
+            <span class="top-name">${m}</span>
+            <div class="top-bar-wrap"><div class="top-bar" style="width:${Math.round(n/maxM*100)}%;background:${colors[m]}"></div></div>
+            <span class="top-count">${n}</span>
+          </div>`).join('')}
+      </div>`;
+    })()}`;
   $('stats-modal').classList.remove('hidden');
 }
 
