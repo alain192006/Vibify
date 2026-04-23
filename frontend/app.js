@@ -522,7 +522,8 @@ async function runSearch() {
   $('search-results').innerHTML = '<div class="empty-state">🔎 Recherche en cours…</div>';
   $('search-actions').classList.add('hidden');
   try {
-    const r = await fetch(`/api/v1/tracks/search?q=${encodeURIComponent(q)}&limit=20`);
+    const headers = spotifyToken ? { 'Authorization': `Bearer ${spotifyToken}` } : {};
+    const r = await fetch(`/api/v1/tracks/search?q=${encodeURIComponent(q)}&limit=20`, { headers });
     if (!r.ok) { const err = await r.json().catch(() => ({})); throw new Error(err.detail || `Erreur ${r.status}`); }
     searchResults = await r.json();
     renderSearchResults();

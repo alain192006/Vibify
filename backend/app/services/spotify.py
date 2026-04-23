@@ -183,8 +183,8 @@ async def get_audio_features(track_ids: list[str]) -> list[dict]:
     return results
 
 
-async def search_tracks(query: str, limit: int = 20) -> list[dict]:
-    token = await get_client_token()
+async def search_tracks(query: str, limit: int = 20, user_token: str = None) -> list[dict]:
+    token = user_token or await get_client_token()
     async with httpx.AsyncClient() as client:
         r = await client.get(
             f"{SPOTIFY_API}/search",

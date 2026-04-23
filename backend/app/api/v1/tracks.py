@@ -1,3 +1,5 @@
+from typing import Optional
+
 from fastapi import APIRouter, Header, HTTPException
 from pydantic import BaseModel
 
@@ -52,9 +54,10 @@ async def audio_features(body: EnrichBody):
 
 
 @router.get("/search")
-async def search(q: str, limit: int = 20):
+async def search(q: str, limit: int = 20, authorization: Optional[str] = Header(None)):
     try:
-        tracks = await sp.search_tracks(q, min(limit, 50))
+        token = authorization.removeprefix("Bearer ") if authorization else None
+        tracks = await sp.search_tracks(q, min(limit, 50), user_token=token)
         return [_format_track(t) for t in tracks]
     except Exception as e:
         raise HTTPException(400, str(e))
