@@ -183,16 +183,40 @@ async def get_audio_features(track_ids: list[str]) -> list[dict]:
     return results
 
 
-async def search_tracks(query: str, limit: int = 20, user_token: str = None) -> list[dict]:
-    token = user_token or await get_client_token()
+def _itunes_to_spotify_raw(item: dict) -> dict:
+    artwork = (item.get("artworkUrl100") or "").replace("100x100bb", "300x300bb")
+    return {
+        "id": f"itunes_{item.get('trackId', '')}",
+        "name": item.get("trackName", ""),
+        "artists": [{"name": item.get("artistName", "")}],
+        "album": {"name": item.get("collectionName", ""), "images": [{"url": artwork}] if artwork else []},
+        "uri": None,
+        "duration_ms": item.get("trackTimeMillis"),
+        "preview_url": item.get("previewUrl"),
+    }
+
+
+async def _search_itunes(query: str, limit: int = 20) -> list[dict]:
     async with httpx.AsyncClient() as client:
         r = await client.get(
-            f"{SPOTIFY_API}/search",
-            headers={"Authorization": f"Bearer {token}"},
-            params={"q": query, "type": "track", "limit": limit},
+            "https://itunes.apple.com/search",
+            params={"term": query, "media": "music", "entity": "song", "limit": limit},
         )
         r.raise_for_status()
-        return r.json()["tracks"]["items"]
+        return [_itunes_to_spotify_raw(i) for i in r.json().get("results", []) if i.get("kind") == "song"]
+
+
+async def search_tracks(query: str, limit: int = 20, user_token: str = None) -> list[dict]:
+    if user_token:
+        async with httpx.AsyncClient() as client:
+            r = await client.get(
+                f"{SPOTIFY_API}/search",
+                headers={"Authorization": f"Bearer {user_token}"},
+                params={"q": query, "type": "track", "limit": limit},
+            )
+            if r.is_success:
+                return r.json()["tracks"]["items"]
+    return await _search_itunes(query, limit)
 
 
 async def add_tracks(access_token: str, playlist_id: str, uris: list[str]) -> None:
