@@ -1162,36 +1162,41 @@ select option { background: #161620; color: #fff; }
 .top-name, .top-count { color: rgba(255,255,255,.75) !important; }
 .stat-section-title { color: rgba(255,255,255,.4) !important; }
 
-/* ── Toolbar — wrap sur 2 lignes, hauteur auto ── */
+/* ── Toolbar — colonne : titre + scroll horizontal boutons ── */
 .toolbar {
-  flex-wrap: wrap !important;
-  align-items: flex-start !important;
-  padding: 10px 16px !important;
+  flex-direction: column !important;
+  align-items: stretch !important;
+  padding: 10px 16px 8px !important;
   gap: 8px !important;
   height: auto !important;
-  min-height: auto !important;
-  overflow: visible !important;
-  position: relative !important;
-  z-index: 5 !important;
+  flex-shrink: 0 !important;
 }
-.toolbar > div:first-child { flex-shrink: 0 !important; min-width: 140px; }
-.toolbar-btns {
+.toolbar > div:first-child {
   display: flex !important;
-  flex-wrap: wrap !important;
-  gap: 5px !important;
-  align-items: center !important;
-  overflow: visible !important;
+  align-items: baseline !important;
+  gap: 10px !important;
 }
+.toolbar-btns {
+  width: 100% !important;
+  overflow-x: auto !important;
+  overflow-y: hidden !important;
+  display: flex !important;
+  flex-wrap: nowrap !important;
+  gap: 5px !important;
+  padding-bottom: 4px !important;
+  scrollbar-width: thin !important;
+  scrollbar-color: rgba(29,185,84,.35) transparent !important;
+}
+.toolbar-btns::-webkit-scrollbar { height: 3px !important; }
+.toolbar-btns::-webkit-scrollbar-track { background: transparent !important; }
+.toolbar-btns::-webkit-scrollbar-thumb { background: rgba(29,185,84,.35) !important; border-radius: 10px !important; }
 .toolbar-btns .btn-icon,
 .toolbar-btns .btn-outline-sm {
   flex-shrink: 0 !important;
   white-space: nowrap !important;
-  font-size: .75rem !important;
-  padding: 5px 10px !important;
+  font-size: .78rem !important;
+  padding: 6px 11px !important;
 }
-
-/* Filters panel en dessous du toolbar */
-.filters-panel { position: relative !important; z-index: 4 !important; }
 
 /* ── Filters — horizontal scroll on small screens ── */
 .filter-row {
