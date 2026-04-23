@@ -236,7 +236,8 @@ input, select { font-family: inherit; }
 .dup-badge  { font-size: .68rem; color: #f59e0b; flex-shrink: 0; }
 
 /* ── Main ── */
-.main-content { flex: 1; display: flex; flex-direction: column; overflow: hidden; }
+.main-content { flex: 1; display: flex; flex-direction: column; overflow: visible; }
+.tracks-wrap  { flex: 1; overflow-y: auto; min-height: 0; padding-bottom: 0; transition: padding-bottom .25s; }
 .toolbar {
   display: flex; align-items: center; justify-content: space-between;
   padding: 12px 20px; border-bottom: 1px solid var(--border); flex-shrink: 0;
@@ -280,7 +281,7 @@ select:focus { outline: none; border-color: var(--accent); }
 .btn-secondary:hover { color: var(--text); border-color: var(--muted); }
 
 /* ── Track list ── */
-.tracks-wrap { flex: 1; overflow-y: auto; padding-bottom: 0; transition: padding-bottom .25s; }
+.tracks-wrap { flex: 1; overflow-y: auto; min-height: 0; padding-bottom: 0; transition: padding-bottom .25s; }
 .empty-state { padding: 60px 20px; text-align: center; color: var(--muted); font-size: 1.05rem; }
 
 .track-header,
