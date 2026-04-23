@@ -572,8 +572,11 @@ function addSearchToLibrary() {
   if (!checked.length) { showToast('Sélectionne des titres d\'abord'); return; }
   const tracks = checked.map(cb => searchResults[parseInt(cb.dataset.idx)]);
   if (!library.liked) library.liked = [];
-  const existing = new Set(library.liked.map(t => t.uri));
-  const newTracks = tracks.filter(t => t.uri && !existing.has(t.uri));
+  const existing = new Set(library.liked.map(t => t.uri || t.id).filter(Boolean));
+  const newTracks = tracks.filter(t => {
+    const key = t.uri || t.id;
+    return key && !existing.has(key);
+  });
   library.liked.push(...newTracks);
   saveToStorage();
   if (!$('app-screen').classList.contains('hidden')) {
