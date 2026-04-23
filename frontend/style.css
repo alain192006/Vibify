@@ -1116,3 +1116,150 @@ select:focus, .search-input:focus {
   border: 1px solid rgba(29,185,84,.2) !important;
   box-shadow: 0 0 30px rgba(29,185,84,.08) !important;
 }
+
+/* ══════════════════════════════════════════
+   READABILITY & LAYOUT FIXES
+══════════════════════════════════════════ */
+
+/* Toolbar title — fully white, readable */
+.toolbar h2 {
+  background: none !important;
+  -webkit-text-fill-color: #fff !important;
+  color: #fff !important;
+  text-shadow: 0 0 24px rgba(29,185,84,.25) !important;
+  font-size: 1.15rem !important;
+}
+.tracks-count { color: rgba(255,255,255,.5) !important; }
+
+/* Track text contrast */
+.track-name   { color: #fff !important; font-weight: 600 !important; }
+.track-artist { color: rgba(255,255,255,.65) !important; }
+.track-col    { color: rgba(255,255,255,.5) !important; }
+.track-dur    { color: rgba(255,255,255,.5) !important; }
+.track-header { color: rgba(255,255,255,.4) !important; font-size: .65rem !important; letter-spacing: 1px; }
+
+/* Card text contrast */
+.card-name   { color: #fff !important; font-weight: 700 !important; }
+.card-artist { color: rgba(255,255,255,.6) !important; }
+.card-dur    { color: rgba(255,255,255,.4) !important; }
+
+/* Sidebar text */
+.item-name { color: rgba(255,255,255,.8) !important; }
+.item-badge { font-size: .68rem !important; }
+.sidebar-title { color: rgba(255,255,255,.4) !important; font-size: .62rem !important; letter-spacing: 1.5px !important; }
+
+/* Modal text */
+.modal-header h3 { color: #fff !important; font-size: 1rem !important; }
+.modal-info { color: rgba(255,255,255,.6) !important; font-size: .84rem !important; }
+
+/* Filter labels */
+.filter-group label { color: rgba(255,255,255,.55) !important; font-size: .78rem !important; }
+select { color: rgba(255,255,255,.85) !important; }
+select option { background: #161620; color: #fff; }
+
+/* Stat labels */
+.stat-lbl { color: rgba(255,255,255,.5) !important; }
+.top-name, .top-count { color: rgba(255,255,255,.75) !important; }
+.stat-section-title { color: rgba(255,255,255,.4) !important; }
+
+/* ── Toolbar buttons — horizontal scroll, never wrap ── */
+.toolbar {
+  flex-wrap: nowrap !important;
+  padding: 10px 16px !important;
+  gap: 12px !important;
+}
+.toolbar > div:first-child { flex-shrink: 0; min-width: 0; }
+.toolbar-btns {
+  overflow-x: auto !important;
+  flex-wrap: nowrap !important;
+  gap: 5px !important;
+  scrollbar-width: none !important;
+  -ms-overflow-style: none !important;
+  padding-bottom: 2px;
+}
+.toolbar-btns::-webkit-scrollbar { display: none !important; }
+.toolbar-btns .btn-icon,
+.toolbar-btns .btn-outline-sm {
+  flex-shrink: 0 !important;
+  white-space: nowrap !important;
+  font-size: .75rem !important;
+  padding: 5px 10px !important;
+}
+
+/* ── Filters — horizontal scroll on small screens ── */
+.filter-row {
+  flex-wrap: nowrap !important;
+  overflow-x: auto !important;
+  scrollbar-width: none !important;
+  gap: 8px !important;
+}
+.filter-row::-webkit-scrollbar { display: none !important; }
+.filter-group {
+  flex-shrink: 0 !important;
+  flex-wrap: nowrap !important;
+}
+.filter-actions { flex-shrink: 0 !important; margin-left: 0 !important; }
+select { min-width: 0 !important; max-width: 130px !important; font-size: .78rem !important; }
+.search-input { width: 140px !important; min-width: 0 !important; }
+
+/* ── Mobile ── */
+@media (max-width: 700px) {
+  :root { --sidebar-w: 48px; --header-h: 50px; }
+
+  /* Header compact */
+  .header { padding: 0 10px !important; }
+  .btn-icon, .btn-outline-sm { font-size: .7rem !important; padding: 5px 8px !important; }
+  .import-info { display: none !important; }
+  #history-btn, #compare-btn, #backup-btn, #view-btn { display: none !important; }
+
+  /* Sidebar — icons only */
+  .sidebar-title, .item-name, .item-badge, .dup-badge, .fusion-check { display: none !important; }
+  .playlist-item { justify-content: center !important; padding: 10px 0 !important; border-left: none !important; border-bottom: 3px solid transparent !important; margin: 1px 2px !important; }
+  .playlist-item.active { border-bottom-color: var(--accent) !important; }
+  .sidebar-bottom { padding: 6px 4px !important; }
+  #fusion-btn { font-size: 0 !important; padding: 8px !important; }
+  #fusion-btn::after { content: '🔀'; font-size: 1rem; }
+
+  /* Toolbar */
+  .toolbar { flex-direction: column !important; align-items: flex-start !important; padding: 8px 10px !important; gap: 6px !important; }
+  .toolbar > div:first-child h2 { font-size: 1rem !important; }
+  .toolbar-btns { width: 100% !important; }
+
+  /* Filters */
+  .filters-panel { padding: 7px 10px !important; }
+  select { font-size: .72rem !important; padding: 5px 6px !important; max-width: 110px !important; }
+  .search-input { width: 110px !important; font-size: .72rem !important; }
+
+  /* Tracks list */
+  .track-header { display: none !important; }
+  .track-row { grid-template-columns: 24px 40px 1fr 52px !important; padding: 5px 10px !important; }
+  .track-row > *:nth-child(4),
+  .track-row > *:nth-child(5) { display: none !important; }
+  .track-name { font-size: .82rem !important; }
+  .track-artist { font-size: .7rem !important; }
+  .preview-play-btn { display: none !important; }
+  .open-spotify-btn { display: none !important; }
+  .tag-edit-btn { opacity: .5 !important; }
+
+  /* Grid */
+  .tracks-grid { grid-template-columns: repeat(auto-fill,minmax(120px,1fr)) !important; gap: 8px !important; padding: 10px !important; }
+
+  /* Float bar */
+  .float-bar { left: var(--sidebar-w) !important; padding: 0 10px !important; gap: 6px !important; }
+  .float-count { font-size: .8rem !important; }
+  #float-dj-btn, #float-tag-btn, #float-copy-btn { display: none !important; }
+
+  /* Stat grid */
+  .stat-grid { grid-template-columns: repeat(2,1fr) !important; }
+
+  /* Modal */
+  .modal-box { padding: 18px 16px !important; width: 96% !important; border-radius: 16px !important; }
+  .modal-wide { max-height: 90vh !important; }
+
+  /* DJS player */
+  .dj-player { padding: 0 10px !important; gap: 8px !important; }
+  .dj-info { width: 110px !important; }
+
+  /* Mini player */
+  .mini-player { padding: 8px 12px !important; gap: 10px !important; }
+}
