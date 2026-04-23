@@ -1,7 +1,7 @@
 {
   "name": "Vibify",
   "short_name": "Vibify",
-  "description": "Trie et organise ta musique Spotify",
+  "description": "Analyse et trie ta musique Spotify",
   "start_url": "/",
   "display": "standalone",
   "background_color": "#121212",
@@ -9,7 +9,7 @@
   "orientation": "portrait-primary",
   "icons": [
     {
-      "src": "/static/icons/icon.svg",
+      "src": "/icon.svg",
       "sizes": "any",
       "type": "image/svg+xml",
       "purpose": "any maskable"
