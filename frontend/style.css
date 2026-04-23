@@ -1162,28 +1162,26 @@ select option { background: #161620; color: #fff; }
 .top-name, .top-count { color: rgba(255,255,255,.75) !important; }
 .stat-section-title { color: rgba(255,255,255,.4) !important; }
 
-/* ── Toolbar — colonne : titre + scroll horizontal boutons ── */
+/* ── Toolbar layout ── */
 .toolbar {
-  flex-direction: column !important;
-  align-items: stretch !important;
+  display: block !important;
   padding: 10px 16px 8px !important;
-  gap: 8px !important;
   height: auto !important;
   flex-shrink: 0 !important;
 }
-.toolbar > div:first-child {
-  display: flex !important;
-  align-items: baseline !important;
-  gap: 10px !important;
+.toolbar-title-row {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+  margin-bottom: 8px;
 }
 .toolbar-btns {
-  width: 100% !important;
-  overflow-x: auto !important;
-  overflow-y: hidden !important;
   display: flex !important;
   flex-wrap: nowrap !important;
+  overflow-x: auto !important;
+  overflow-y: hidden !important;
   gap: 5px !important;
-  padding-bottom: 4px !important;
+  padding-bottom: 3px !important;
   scrollbar-width: thin !important;
   scrollbar-color: rgba(29,185,84,.35) transparent !important;
 }
@@ -1283,6 +1281,52 @@ select { min-width: 0 !important; max-width: 130px !important; font-size: .78rem
 /* ══════════════════════════════════════════
    WRAPPED · MOOD · SHARE · LYRICS
 ══════════════════════════════════════════ */
+
+/* ── Onboarding ── */
+.feature-pills {
+  display: flex; flex-wrap: wrap; gap: 6px; justify-content: center;
+  margin: 4px 0 16px;
+}
+.feature-pill {
+  background: rgba(29,185,84,.1); border: 1px solid rgba(29,185,84,.25);
+  border-radius: 50px; padding: 4px 12px; font-size: .75rem; color: rgba(255,255,255,.8);
+}
+.onboard-methods { display: flex; flex-direction: column; gap: 10px; margin-bottom: 14px; }
+.onboard-method {
+  position: relative; display: flex; align-items: center; gap: 14px;
+  background: rgba(255,255,255,.05); border: 1px solid rgba(255,255,255,.1);
+  border-radius: 14px; padding: 14px 16px; cursor: pointer; text-align: left;
+  transition: all .22s cubic-bezier(.34,1.56,.64,1); color: #fff; width: 100%;
+}
+.onboard-method:hover {
+  transform: translateY(-2px) scale(1.02);
+  box-shadow: 0 12px 32px rgba(0,0,0,.3);
+}
+.onboard-lastfm  { border-color: rgba(213,16,7,.35) !important; }
+.onboard-lastfm:hover  { background: rgba(213,16,7,.12) !important; border-color: #d51007 !important; }
+.onboard-search  { }
+.onboard-search:hover  { background: rgba(29,185,84,.1) !important; border-color: rgba(29,185,84,.4) !important; }
+.onboard-spotify:hover { background: rgba(29,185,84,.1) !important; border-color: rgba(29,185,84,.4) !important; }
+.onboard-method-icon  { font-size: 1.6rem; flex-shrink: 0; }
+.onboard-method-title { font-size: 1rem; font-weight: 700; display: block; }
+.onboard-method-sub   { font-size: .78rem; color: rgba(255,255,255,.5); display: block; margin-top: 2px; }
+.onboard-badge {
+  position: absolute; top: -8px; right: 12px;
+  background: #d51007; color: #fff; border-radius: 50px;
+  padding: 2px 10px; font-size: .65rem; font-weight: 700; letter-spacing: .5px;
+}
+.zip-details {
+  margin-bottom: 8px;
+  border: 1px solid rgba(255,255,255,.08); border-radius: 12px;
+  overflow: hidden;
+}
+.zip-details summary {
+  padding: 10px 14px; cursor: pointer; font-size: .84rem; color: rgba(255,255,255,.5);
+  user-select: none; list-style: none;
+}
+.zip-details summary::-webkit-details-marker { display: none; }
+.zip-details[open] summary { color: rgba(255,255,255,.8); border-bottom: 1px solid rgba(255,255,255,.08); }
+.zip-inner { padding: 12px 14px; }
 
 /* ── Wrapped ── */
 @keyframes wrappedIn {

@@ -41,8 +41,10 @@
       <span class="bg-deco" style="left:20%;top:88%;font-size:3.5rem;--dur:8s;--delay:1.8s;--rot:-22deg">🎼</span>
     </div>
     <div class="import-card">
+
+      <!-- Logo -->
       <div class="logo">
-        <svg class="logo-svg" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 160 40" fill="none" height="48">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 160 40" fill="none" height="48">
           <rect class="logo-bar" x="0"  y="20" width="10" height="20" rx="5" fill="#1db954"/>
           <rect class="logo-bar" x="14" y="8"  width="10" height="32" rx="5" fill="#1db954"/>
           <rect class="logo-bar" x="28" y="14" width="10" height="26" rx="5" fill="#1db954"/>
@@ -51,8 +53,19 @@
           <text x="76" y="29" font-family="-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif" font-size="22" font-weight="800" fill="white" letter-spacing="-0.5">Vibify</text>
         </svg>
       </div>
-      <p class="tagline">Trie et organise ta musique Spotify</p>
+      <p class="tagline">Ton univers musical, enfin visualisé</p>
 
+      <!-- Feature pills -->
+      <div class="feature-pills">
+        <span class="feature-pill">🎁 Wrapped</span>
+        <span class="feature-pill">🎵 Paroles</span>
+        <span class="feature-pill">🎭 Mood</span>
+        <span class="feature-pill">📊 Stats</span>
+        <span class="feature-pill">🎧 DJ Mode</span>
+        <span class="feature-pill">📸 Carte</span>
+      </div>
+
+      <!-- Saved banner -->
       <div id="saved-banner" class="saved-banner hidden">
         <span id="saved-info"></span>
         <div class="saved-actions">
@@ -62,38 +75,51 @@
       </div>
 
       <div id="import-form">
-        <div class="steps-box">
-          <h3>Comment obtenir tes données :</h3>
-          <ol class="steps-list">
-            <li>Va sur <strong>spotify.com</strong> → profil → <strong>Compte</strong></li>
-            <li><strong>Confidentialité</strong> → <strong>Télécharger tes données</strong></li>
-            <li>Sélectionne <strong>"Données du compte"</strong> → Demander</li>
-            <li>Tu reçois un ZIP par e-mail (quelques min à quelques heures)</li>
-            <li>Dézippe et glisse les fichiers JSON ci-dessous 👇</li>
-          </ol>
-          <p class="file-tip">📄 Glisse directement le <code>.zip</code> Spotify, ou les fichiers <code>YourLibrary.json</code> + <code>Playlist1.json</code>…</p>
+
+        <!-- 3 main entry points -->
+        <div class="onboard-methods">
+
+          <button id="lastfm-import-btn" class="onboard-method onboard-lastfm">
+            <span class="onboard-method-icon">🎵</span>
+            <span class="onboard-method-title">Last.fm</span>
+            <span class="onboard-method-sub">Connecte ton historique en 10 sec</span>
+            <span class="onboard-badge">Recommandé</span>
+          </button>
+
+          <button id="search-music-btn" class="onboard-method onboard-search">
+            <span class="onboard-method-icon">🔍</span>
+            <span class="onboard-method-title">Chercher</span>
+            <span class="onboard-method-sub">Ajoute des titres un par un</span>
+          </button>
+
+          <button id="spotify-import-btn" class="onboard-method onboard-spotify">
+            <span class="onboard-method-icon">🟢</span>
+            <span class="onboard-method-title">Spotify</span>
+            <span class="onboard-method-sub">Importe toute ta bibliothèque</span>
+          </button>
+
         </div>
-        <div id="drop-zone" class="drop-zone">
-          <div class="drop-icon">📁</div>
-          <p>Glisse tes fichiers JSON ou le ZIP Spotify ici</p>
-          <span class="drop-or">ou</span>
-          <label class="import-label">
-            Choisir les fichiers
-            <input type="file" id="file-input" accept=".json,.zip" multiple hidden>
-          </label>
-        </div>
+
+        <!-- ZIP drop zone (collapsed by default) -->
+        <details class="zip-details">
+          <summary>📁 Importer un ZIP Spotify</summary>
+          <div class="zip-inner">
+            <div id="drop-zone" class="drop-zone">
+              <div class="drop-icon">📁</div>
+              <p>Glisse ton ZIP Spotify ici</p>
+              <span class="drop-or">ou</span>
+              <label class="import-label">
+                Choisir les fichiers
+                <input type="file" id="file-input" accept=".json,.zip" multiple hidden>
+              </label>
+            </div>
+            <p class="file-tip">Spotify.com → Compte → Confidentialité → Télécharger tes données</p>
+          </div>
+        </details>
+
         <p id="import-error" class="import-error hidden"></p>
-        <div class="demo-divider"><span>ou</span></div>
-        <button id="search-music-btn" class="btn-primary btn-spotify-import">🔍 Chercher de la musique</button>
-        <p class="spotify-import-hint">Recherche des artistes et titres directement — sans ZIP</p>
-        <div class="demo-divider"><span>ou</span></div>
-        <button id="lastfm-import-btn" class="btn-lastfm btn-spotify-import">🎵 Importer depuis Last.fm</button>
-        <p class="spotify-import-hint">Connecte ton pseudo Last.fm — importe tout ton historique</p>
-        <div class="demo-divider"><span>ou</span></div>
-        <button id="spotify-import-btn" class="btn-spotify btn-spotify-import">🎵 Importer depuis Spotify</button>
-        <p class="spotify-import-hint">Connecte ton compte et importe tout en un clic — sans ZIP</p>
-        <div class="demo-divider"><span>ou</span></div>
-        <button id="demo-btn" class="btn-demo">🎮 Tester avec des données démo</button>
+
+        <button id="demo-btn" class="btn-demo" style="margin-top:8px">🎮 Voir une démo</button>
       </div>
     </div>
   </div>
@@ -168,17 +194,17 @@
       <main class="main-content">
 
         <div class="toolbar">
-          <div>
+          <div class="toolbar-title-row">
             <h2 id="playlist-title">—</h2>
             <span id="tracks-count" class="tracks-count"></span>
           </div>
           <div class="toolbar-btns">
-            <button id="shuffle-btn" class="btn-icon" title="Mélanger">🔀 Shuffle</button>
+            <button id="shuffle-btn" class="btn-icon">🔀 Shuffle</button>
             <button id="map-btn"       class="btn-icon">🗺️ Carte</button>
             <button id="quiz-btn"      class="btn-icon">🎮 Quiz</button>
             <button id="roulette-btn"  class="btn-icon">🎲 Roulette</button>
             <button id="mosaic-btn"    class="btn-icon">🎨 Mosaïque</button>
-            <div class="flow-wrap">
+            <div class="flow-wrap" style="flex-shrink:0">
               <button id="flow-btn"    class="btn-icon">🌊 Flow ▾</button>
               <div id="flow-menu" class="flow-menu hidden">
                 <button data-mode="ascending">⬆ Énergie croissante</button>
@@ -189,10 +215,10 @@
             </div>
             <button id="coh-btn"     class="btn-icon">🎯 Cohérence</button>
             <button id="split-btn"   class="btn-icon">✂️ Diviser</button>
-            <button id="dup-btn"     class="btn-outline-sm">🔍 Doublons</button>
-            <button id="search-toolbar-btn" class="btn-outline-sm">🔎 Chercher</button>
-            <button id="reco-btn" class="btn-outline-sm">✨ Pour toi</button>
-            <button id="mood-btn" class="btn-outline-sm">🎭 Mood</button>
+            <button id="dup-btn"     class="btn-icon">🔍 Doublons</button>
+            <button id="search-toolbar-btn" class="btn-icon">🔎 Chercher</button>
+            <button id="reco-btn"    class="btn-icon">✨ Pour toi</button>
+            <button id="mood-btn"    class="btn-icon">🎭 Mood</button>
           </div>
         </div>
 
