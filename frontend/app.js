@@ -521,11 +521,13 @@ async function importFromSpotify() {
   try {
     showLoading('Récupération des titres likés…');
     const likedR = await fetch('/api/v1/tracks/liked', { headers: { 'Authorization': `Bearer ${spotifyToken}` } });
-    if (likedR.ok) library.liked = await likedR.json();
+    if (!likedR.ok) { const e = await likedR.json().catch(()=>({})); throw new Error(e.detail || `Liked: ${likedR.status}`); }
+    library.liked = await likedR.json();
     updateLoadingProgress(20, 100, `${library.liked.length} titres likés`);
 
     const plR = await fetch('/api/v1/playlists/', { headers: { 'Authorization': `Bearer ${spotifyToken}` } });
-    const playlists = plR.ok ? await plR.json() : [];
+    if (!plR.ok) { const e = await plR.json().catch(()=>({})); throw new Error(e.detail || `Playlists: ${plR.status}`); }
+    const playlists = await plR.json();
     updateLoadingProgress(30, 100, `${playlists.length} playlists trouvées`);
 
     for (let i = 0; i < playlists.length; i++) {
