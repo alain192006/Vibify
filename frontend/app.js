@@ -685,6 +685,43 @@ function addRecoToLibrary() {
   showToast(`✅ ${newTracks.length} titre${newTracks.length>1?'s':''} ajouté${newTracks.length>1?'s':''}  !`);
 }
 
+// ── Import Last.fm ───────────────────────────────────────────
+async function importFromLastfm() {
+  const username = prompt('Ton pseudo Last.fm :');
+  if (!username?.trim()) return;
+  showLoading('Récupération de ton historique Last.fm…');
+  try {
+    const [recentRes, topRes, lovedRes] = await Promise.all([
+      fetch(`/api/v1/lastfm/recent?username=${encodeURIComponent(username)}&limit=500`),
+      fetch(`/api/v1/lastfm/top-tracks?username=${encodeURIComponent(username)}&period=overall&limit=200`),
+      fetch(`/api/v1/lastfm/loved?username=${encodeURIComponent(username)}&limit=200`),
+    ]);
+    if (!recentRes.ok) { const e = await recentRes.json().catch(()=>({})); throw new Error(e.detail || 'Pseudo introuvable'); }
+    const recent = await recentRes.json();
+    const top    = topRes.ok ? await topRes.json() : [];
+    const loved  = lovedRes.ok ? await lovedRes.json() : [];
+
+    // Merge unique tracks (recent + top + loved), prefer loved then top
+    const seen = new Set();
+    const merged = [];
+    [...loved, ...top, ...recent].forEach(t => {
+      const key = (t.name + '|' + (t.artists||[])[0]).toLowerCase();
+      if (!seen.has(key)) { seen.add(key); merged.push(t); }
+    });
+
+    library = { liked: merged, playlists: [] };
+    streamingHistory = [];
+    saveToStorage();
+    hideLoading();
+    launchApp();
+    renderTracks(library.liked);
+    showToast(`✅ ${merged.length} titres importés depuis Last.fm !`);
+  } catch(e) {
+    hideLoading();
+    alert('Erreur Last.fm : ' + e.message);
+  }
+}
+
 // ── Import depuis Spotify ─────────────────────────────────────
 let pendingSpotifyImport = false;
 
@@ -2276,6 +2313,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
   // Import
   $('spotify-import-btn').addEventListener('click', importFromSpotify);
+  $('lastfm-import-btn').addEventListener('click', importFromLastfm);
   $('demo-btn').addEventListener('click', loadDemoData);
   $('file-input').addEventListener('change', e => handleFiles(e.target.files));
   const drop = $('drop-zone');
