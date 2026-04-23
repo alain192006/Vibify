@@ -1162,11 +1162,9 @@ async function _processArtQueue() {
       continue;
     }
     try {
-      const q = encodeURIComponent(`${artist} ${title}`);
-      const r = await fetch(`https://itunes.apple.com/search?term=${q}&entity=song&limit=1&media=music`);
+      const r = await fetch(`/api/v1/artwork?artist=${encodeURIComponent(artist)}&title=${encodeURIComponent(title)}`);
       const data = await r.json();
-      const raw = data.results?.[0]?.artworkUrl100 || null;
-      const url = raw ? raw.replace('100x100bb', '300x300bb') : null;
+      const url = data.url || null;
       _artCache.set(key, url);
       if (url && el.isConnected) _applyArtwork(el, url);
     } catch { _artCache.set(key, null); }
