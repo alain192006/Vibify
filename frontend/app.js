@@ -505,6 +505,59 @@ async function enrichAudioFeatures(ids, uriMap) {
   } catch {}
 }
 
+// ── Import depuis Spotify ─────────────────────────────────────
+let pendingSpotifyImport = false;
+
+async function importFromSpotify() {
+  if (!spotifyToken) {
+    pendingSpotifyImport = true;
+    connectSpotify();
+    return;
+  }
+  pendingSpotifyImport = false;
+  library = { liked: [], playlists: [] };
+  streamingHistory = [];
+
+  try {
+    showLoading('Récupération des titres likés…');
+    const likedR = await fetch('/api/v1/tracks/liked', { headers: { 'Authorization': `Bearer ${spotifyToken}` } });
+    if (likedR.ok) library.liked = await likedR.json();
+    updateLoadingProgress(20, 100, `${library.liked.length} titres likés`);
+
+    const plR = await fetch('/api/v1/playlists/', { headers: { 'Authorization': `Bearer ${spotifyToken}` } });
+    const playlists = plR.ok ? await plR.json() : [];
+    updateLoadingProgress(30, 100, `${playlists.length} playlists trouvées`);
+
+    for (let i = 0; i < playlists.length; i++) {
+      const pl = playlists[i];
+      updateLoadingProgress(30 + Math.round(i / Math.max(playlists.length, 1) * 65), 100,
+        `Playlist ${i + 1}/${playlists.length} : ${pl.name}`);
+      try {
+        const tR = await fetch(`/api/v1/playlists/${pl.id}/tracks`, { headers: { 'Authorization': `Bearer ${spotifyToken}` } });
+        const tracks = tR.ok ? await tR.json() : [];
+        if (tracks.length) library.playlists.push({ name: pl.name, items: tracks });
+      } catch {}
+    }
+
+    hideLoading();
+    launchApp();
+    $('history-btn').classList.add('hidden');
+    saveToStorage();
+
+    const allFlat = [...library.liked, ...library.playlists.flatMap(p => p.items)];
+    const uriMap = {};
+    allFlat.forEach(t => { if (t.uri) uriMap[t.uri] = t; });
+    const ids = [...new Set(allFlat.map(t => t.uri).filter(u => u?.startsWith('spotify:track:')).map(u => u.split(':')[2]))];
+    await enrichAudioFeatures(ids, uriMap);
+    saveToStorage();
+    renderTracks(library.liked.length ? library.liked : allFlat);
+    showToast(`✅ ${allFlat.length} titres importés depuis Spotify !`);
+  } catch (e) {
+    hideLoading();
+    alert('Erreur import Spotify : ' + e.message);
+  }
+}
+
 // ── Demo Mode ─────────────────────────────────────────────────
 function loadDemoData() {
   const demo = (name, artist, album, energy, valence, dance, tempo, img) => ({
@@ -1912,6 +1965,7 @@ document.addEventListener('DOMContentLoaded', () => {
     if (e.data?.type === 'vibify_spotify_auth') {
       spotifyToken = e.data.accessToken;
       fetchSpotifyUser();
+      if (pendingSpotifyImport) importFromSpotify();
     }
   });
 
@@ -1921,6 +1975,7 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   // Import
+  $('spotify-import-btn').addEventListener('click', importFromSpotify);
   $('demo-btn').addEventListener('click', loadDemoData);
   $('file-input').addEventListener('change', e => handleFiles(e.target.files));
   const drop = $('drop-zone');
