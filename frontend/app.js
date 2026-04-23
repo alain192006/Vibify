@@ -1058,7 +1058,7 @@ function renderTracks(tracks) {
       const cid = t.uri?.split(':')[2] || '';
       const artContent = t.image
         ? `<img class="card-img" src="${esc(t.image)}" alt="" loading="lazy">`
-        : `<span class="card-emoji">🎵</span>`;
+        : `<span class="card-emoji" data-fetch-art="${esc((t.artists||[])[0]||'')}|${esc(t.name)}">🎵</span>`;
       const cardTagChips = getTagsFor(t.uri).map(tag => `<span class="tag-chip">${esc(tag)}</span>`).join('');
       card.innerHTML = `
         <div class="card-art" style="background:${color}">
@@ -1096,7 +1096,7 @@ function renderTracks(tracks) {
       const id = t.uri?.split(':')[2] || '';
       const imgHtml = t.image
         ? `<img class="track-img" src="${esc(t.image)}" alt="" loading="lazy">`
-        : `<div class="track-placeholder" style="background:${color}">🎵</div>`;
+        : `<div class="track-placeholder" data-fetch-art="${esc((t.artists||[])[0]||'')}|${esc(t.name)}" style="background:${color}">🎵</div>`;
       const rowTags = getTagsFor(t.uri).map(tag => `<span class="tag-chip">${esc(tag)}</span>`).join('');
       row.innerHTML = `
         <input type="checkbox" class="track-check" data-uri="${esc(t.uri)}">
@@ -1131,6 +1131,57 @@ function renderTracks(tracks) {
       wrap.appendChild(row);
     });
   }
+  fetchMissingArtwork();
+}
+
+// ── iTunes artwork lazy-fetch ─────────────────────────────────
+const _artCache = new Map();
+let _artQueue = [];
+let _artWorkers = 0;
+const ART_MAX_WORKERS = 3;
+
+function fetchMissingArtwork() {
+  _artQueue = [...document.querySelectorAll('[data-fetch-art]')];
+  while (_artWorkers < ART_MAX_WORKERS && _artQueue.length) {
+    _artWorkers++;
+    _processArtQueue();
+  }
+}
+
+async function _processArtQueue() {
+  while (_artQueue.length) {
+    const el = _artQueue.shift();
+    if (!el.isConnected || !el.dataset.fetchArt) continue;
+    const sep = el.dataset.fetchArt.indexOf('|');
+    const artist = el.dataset.fetchArt.slice(0, sep);
+    const title  = el.dataset.fetchArt.slice(sep + 1);
+    const key = `${artist}|${title}`;
+    if (_artCache.has(key)) {
+      const url = _artCache.get(key);
+      if (url && el.isConnected) _applyArtwork(el, url);
+      continue;
+    }
+    try {
+      const q = encodeURIComponent(`${artist} ${title}`);
+      const r = await fetch(`https://itunes.apple.com/search?term=${q}&entity=song&limit=1&media=music`);
+      const data = await r.json();
+      const raw = data.results?.[0]?.artworkUrl100 || null;
+      const url = raw ? raw.replace('100x100bb', '300x300bb') : null;
+      _artCache.set(key, url);
+      if (url && el.isConnected) _applyArtwork(el, url);
+    } catch { _artCache.set(key, null); }
+  }
+  _artWorkers--;
+}
+
+function _applyArtwork(el, url) {
+  const img = document.createElement('img');
+  img.src = url;
+  img.alt = '';
+  img.loading = 'lazy';
+  img.onerror = () => img.remove();
+  img.className = el.classList.contains('card-emoji') ? 'card-img' : 'track-img';
+  el.replaceWith(img);
 }
 
 function attachToggle(el, cb, t) {
