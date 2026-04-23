@@ -833,3 +833,286 @@ body.dj-active .float-bar { bottom: var(--dj-h); }
 /* Last.fm button */
 .btn-lastfm { background: #d51007; color: #fff; border: none; border-radius: 50px; padding: 14px 28px; font-size: 1rem; font-weight: 700; cursor: pointer; transition: opacity .2s; }
 .btn-lastfm:hover { opacity: .85; }
+
+/* ══════════════════════════════════════════
+   VISUAL OVERHAUL — STUNNING REDESIGN
+══════════════════════════════════════════ */
+
+/* New tokens */
+:root {
+  --glow:        rgba(29,185,84,.35);
+  --glow-strong: rgba(29,185,84,.6);
+  --grad-accent: linear-gradient(135deg,#1db954,#00d4aa);
+  --glass:       rgba(255,255,255,.05);
+  --glass-b:     rgba(255,255,255,.09);
+  --radius: 12px;
+}
+
+@keyframes bgPulse {
+  0%,100% { background-position: 0% 50%; }
+  50%     { background-position: 100% 50%; }
+}
+@keyframes glowPulse {
+  0%,100% { box-shadow: 0 0 20px rgba(29,185,84,.15); }
+  50%     { box-shadow: 0 0 40px rgba(29,185,84,.35); }
+}
+
+/* Subtle animated dark background for app */
+.app-screen {
+  background: linear-gradient(135deg,#090914 0%,#0b150b 40%,#140912 100%) !important;
+  background-size: 300% 300% !important;
+  animation: bgPulse 18s ease infinite;
+}
+
+/* ── Header glassmorphism ── */
+.header {
+  background: rgba(9,9,20,.75) !important;
+  backdrop-filter: blur(24px) saturate(180%) !important;
+  border-bottom: 1px solid rgba(255,255,255,.07) !important;
+  box-shadow: 0 2px 24px rgba(0,0,0,.5) !important;
+}
+.header-logo {
+  background: var(--grad-accent);
+  -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+  filter: drop-shadow(0 0 8px rgba(29,185,84,.4));
+}
+
+/* ── Sidebar glassmorphism ── */
+.sidebar {
+  background: rgba(9,9,18,.7) !important;
+  backdrop-filter: blur(20px) !important;
+  border-right: 1px solid rgba(255,255,255,.07) !important;
+}
+.playlist-item { border-radius: 8px; margin: 1px 6px; transition: all .18s !important; }
+.playlist-item:hover { background: rgba(255,255,255,.07) !important; color: #fff !important; }
+.playlist-item.active {
+  background: linear-gradient(90deg,rgba(29,185,84,.2),rgba(29,185,84,.04)) !important;
+  border-left-color: var(--accent) !important;
+  color: #fff !important;
+  box-shadow: inset 0 0 24px rgba(29,185,84,.06), 0 0 12px rgba(29,185,84,.1) !important;
+}
+.item-badge {
+  background: rgba(29,185,84,.12) !important;
+  color: var(--accent) !important;
+  border: 1px solid rgba(29,185,84,.2) !important;
+}
+
+/* ── Toolbar ── */
+.toolbar {
+  background: rgba(9,9,18,.55) !important;
+  backdrop-filter: blur(12px) !important;
+  border-bottom: 1px solid rgba(255,255,255,.06) !important;
+}
+.toolbar h2 {
+  background: linear-gradient(135deg,#fff 40%,rgba(255,255,255,.55));
+  -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+  letter-spacing: -.3px;
+}
+
+/* ── btn-icon glow ── */
+.btn-icon {
+  background: rgba(255,255,255,.06) !important;
+  border: 1px solid rgba(255,255,255,.1) !important;
+  backdrop-filter: blur(8px);
+  transition: all .2s !important;
+}
+.btn-icon:hover {
+  background: rgba(29,185,84,.14) !important;
+  border-color: rgba(29,185,84,.45) !important;
+  color: var(--accent) !important;
+  box-shadow: 0 0 16px rgba(29,185,84,.2), 0 2px 8px rgba(0,0,0,.3) !important;
+}
+.btn-outline-sm {
+  background: rgba(255,255,255,.04) !important;
+  border: 1px solid rgba(255,255,255,.1) !important;
+  transition: all .2s !important;
+}
+.btn-outline-sm:hover {
+  background: rgba(29,185,84,.1) !important;
+  border-color: rgba(29,185,84,.4) !important;
+  color: var(--accent) !important;
+}
+
+/* ── Buttons gradient ── */
+.btn-primary {
+  background: var(--grad-accent) !important;
+  box-shadow: 0 4px 18px rgba(29,185,84,.35) !important;
+  transition: transform .15s, box-shadow .15s !important;
+}
+.btn-primary:hover {
+  box-shadow: 0 6px 28px rgba(29,185,84,.55) !important;
+  transform: scale(1.04) translateY(-1px) !important;
+  filter: brightness(1.1);
+}
+.btn-spotify {
+  background: var(--grad-accent) !important;
+  box-shadow: 0 4px 18px rgba(29,185,84,.4) !important;
+}
+.btn-spotify:hover { box-shadow: 0 6px 28px rgba(29,185,84,.6) !important; }
+
+/* ── Filters ── */
+.filters-panel {
+  background: rgba(9,9,18,.5) !important;
+  backdrop-filter: blur(12px) !important;
+  border-bottom: 1px solid rgba(255,255,255,.05) !important;
+}
+select, .search-input {
+  background: rgba(255,255,255,.06) !important;
+  border: 1px solid rgba(255,255,255,.1) !important;
+  border-radius: 8px !important;
+  transition: border-color .2s, box-shadow .2s !important;
+}
+select:focus, .search-input:focus {
+  border-color: var(--accent) !important;
+  box-shadow: 0 0 0 3px rgba(29,185,84,.15) !important;
+}
+
+/* ── Track list ── */
+.track-header {
+  background: rgba(9,9,18,.8) !important;
+  backdrop-filter: blur(12px) !important;
+  border-bottom: 1px solid rgba(255,255,255,.06) !important;
+}
+.track-row {
+  border-radius: 10px !important;
+  transition: background .15s, transform .15s, box-shadow .15s !important;
+}
+.track-row:hover {
+  background: rgba(255,255,255,.07) !important;
+  transform: translateX(3px) !important;
+  box-shadow: -3px 0 0 var(--accent), 0 4px 24px rgba(0,0,0,.3) !important;
+}
+.track-row.selected {
+  background: rgba(29,185,84,.1) !important;
+  box-shadow: -3px 0 0 var(--accent), 0 0 20px rgba(29,185,84,.08) !important;
+}
+.track-row.playing {
+  background: rgba(29,185,84,.12) !important;
+  box-shadow: -3px 0 0 var(--accent), 0 0 30px rgba(29,185,84,.18) !important;
+  animation: glowPulse 2s ease infinite;
+}
+.track-img { border-radius: 8px !important; box-shadow: 0 4px 12px rgba(0,0,0,.5) !important; }
+.track-row:hover .track-img { transform: scale(1.1) !important; box-shadow: 0 6px 20px rgba(0,0,0,.6) !important; }
+
+/* ── Track cards (grid) ── */
+.track-card {
+  background: rgba(255,255,255,.04) !important;
+  border: 1px solid rgba(255,255,255,.08) !important;
+  backdrop-filter: blur(10px) !important;
+  transition: transform .22s cubic-bezier(.34,1.56,.64,1), box-shadow .22s, border-color .22s !important;
+}
+.track-card:hover {
+  transform: translateY(-8px) scale(1.025) !important;
+  box-shadow: 0 24px 56px rgba(0,0,0,.55), 0 0 0 1px rgba(29,185,84,.35) !important;
+  border-color: rgba(29,185,84,.35) !important;
+}
+.card-play-btn { border-radius: 50% !important; box-shadow: 0 4px 16px rgba(0,0,0,.5) !important; }
+
+/* ── Modals glassmorphism ── */
+.modal-box {
+  background: rgba(10,10,22,.88) !important;
+  backdrop-filter: blur(32px) saturate(180%) !important;
+  border: 1px solid rgba(255,255,255,.11) !important;
+  box-shadow: 0 32px 80px rgba(0,0,0,.75), 0 0 0 1px rgba(29,185,84,.08) !important;
+  border-radius: 20px !important;
+}
+.modal-header { border-bottom: 1px solid rgba(255,255,255,.07) !important; }
+
+/* ── Stat cards ── */
+.stat-card {
+  background: rgba(255,255,255,.05) !important;
+  border: 1px solid rgba(255,255,255,.08) !important;
+  backdrop-filter: blur(10px) !important;
+  transition: transform .2s, box-shadow .2s !important;
+}
+.stat-card:hover {
+  transform: translateY(-4px) !important;
+  box-shadow: 0 12px 32px rgba(0,0,0,.35), 0 0 0 1px rgba(29,185,84,.2) !important;
+}
+.stat-num {
+  background: var(--grad-accent) !important;
+  -webkit-background-clip: text !important; -webkit-text-fill-color: transparent !important; background-clip: text !important;
+}
+
+/* ── Top bars ── */
+.top-bar { background: var(--grad-accent) !important; border-radius: 4px !important; }
+.profile-bar { border-radius: 4px !important; }
+
+/* ── Mini player ── */
+.mini-player {
+  background: rgba(6,6,16,.88) !important;
+  backdrop-filter: blur(32px) saturate(200%) !important;
+  border-top: 1px solid rgba(255,255,255,.1) !important;
+  box-shadow: 0 -8px 40px rgba(0,0,0,.5), 0 0 60px rgba(29,185,84,.08) !important;
+}
+.mini-player-play {
+  background: var(--grad-accent) !important;
+  box-shadow: 0 4px 18px rgba(29,185,84,.5) !important;
+}
+.mini-player-progress { background: var(--grad-accent) !important; }
+
+/* ── Custom scrollbar ── */
+::-webkit-scrollbar { width: 4px; height: 4px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: rgba(29,185,84,.25); border-radius: 10px; }
+::-webkit-scrollbar-thumb:hover { background: rgba(29,185,84,.55); }
+
+/* ── Import screen ── */
+.import-card {
+  box-shadow: 0 32px 80px rgba(0,0,0,.65), 0 0 0 1px rgba(29,185,84,.15), inset 0 1px 0 rgba(255,255,255,.1) !important;
+}
+.drop-zone {
+  border: 2px dashed rgba(29,185,84,.2) !important;
+  transition: all .2s !important;
+}
+.drop-zone:hover, .drop-zone.drag-over {
+  border-color: var(--accent) !important;
+  box-shadow: 0 0 24px rgba(29,185,84,.25), inset 0 0 24px rgba(29,185,84,.05) !important;
+  background: rgba(29,185,84,.04) !important;
+}
+.btn-spotify-import {
+  box-shadow: 0 4px 20px rgba(29,185,84,.3) !important;
+  transition: transform .15s, box-shadow .15s !important;
+}
+.btn-spotify-import:hover {
+  transform: scale(1.03) translateY(-1px) !important;
+  box-shadow: 0 8px 32px rgba(29,185,84,.5) !important;
+}
+
+/* ── Float bar (selection) ── */
+.float-bar {
+  background: rgba(10,10,22,.9) !important;
+  backdrop-filter: blur(20px) !important;
+  border-top: 1px solid rgba(255,255,255,.1) !important;
+  box-shadow: 0 -8px 32px rgba(0,0,0,.4), 0 0 40px rgba(29,185,84,.06) !important;
+}
+
+/* ── Search result rows ── */
+.search-result-row { border-radius: 10px !important; transition: background .15s, transform .1s !important; }
+.search-result-row:hover { background: rgba(255,255,255,.08) !important; transform: translateX(2px) !important; }
+.search-result-row.selected {
+  background: rgba(29,185,84,.1) !important;
+  outline: 1.5px solid rgba(29,185,84,.4) !important;
+  box-shadow: 0 0 16px rgba(29,185,84,.1) !important;
+}
+
+/* ── Saved banner ── */
+.saved-banner {
+  background: rgba(29,185,84,.08) !important;
+  border: 1px solid rgba(29,185,84,.3) !important;
+  box-shadow: 0 0 20px rgba(29,185,84,.12) !important;
+}
+
+/* ── Tag chips ── */
+.tag-chip {
+  background: rgba(29,185,84,.12) !important;
+  border: 1px solid rgba(29,185,84,.2) !important;
+  color: var(--accent) !important;
+}
+
+/* ── Profile card ── */
+.profile-card {
+  background: linear-gradient(135deg,rgba(29,185,84,.08),rgba(0,212,170,.04)) !important;
+  border: 1px solid rgba(29,185,84,.2) !important;
+  box-shadow: 0 0 30px rgba(29,185,84,.08) !important;
+}
