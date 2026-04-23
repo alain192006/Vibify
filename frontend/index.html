@@ -115,6 +115,8 @@
       <div class="header-actions">
         <span id="import-info" class="import-info"></span>
         <button id="history-btn" class="btn-icon hidden">📈 Historique</button>
+        <button id="wrapped-btn" class="btn-icon">🎁 Wrapped</button>
+        <button id="share-btn"   class="btn-icon">📸 Carte</button>
         <button id="compare-btn" class="btn-icon">👥 Comparer</button>
         <button id="backup-btn"  class="btn-icon">💾 Backup</button>
         <button id="stats-btn"   class="btn-icon">📊 Stats</button>
@@ -190,6 +192,7 @@
             <button id="dup-btn"     class="btn-outline-sm">🔍 Doublons</button>
             <button id="search-toolbar-btn" class="btn-outline-sm">🔎 Chercher</button>
             <button id="reco-btn" class="btn-outline-sm">✨ Pour toi</button>
+            <button id="mood-btn" class="btn-outline-sm">🎭 Mood</button>
           </div>
         </div>
 
@@ -545,6 +548,43 @@
   <!-- SHORTCUTS HINT -->
   <div id="shortcuts-toast" class="shortcuts-toast hidden">
     <strong>Raccourcis :</strong> Ctrl+A Tout sélectionner · Ctrl+F Rechercher · Esc Fermer
+  </div>
+
+  <!-- MOOD MODAL -->
+  <div id="mood-modal" class="modal hidden">
+    <div class="modal-box">
+      <div class="modal-header">
+        <h3>🎭 Comment tu te sens ?</h3>
+        <button id="close-mood-btn" class="modal-close">✕</button>
+      </div>
+      <p class="modal-info" style="margin-bottom:16px">Vibify filtre ta bibliothèque selon ton humeur du moment</p>
+      <div class="mood-grid">
+        <button class="mood-btn" data-mood="hype">🔥<span>Hype</span></button>
+        <button class="mood-btn" data-mood="chill">😌<span>Chill</span></button>
+        <button class="mood-btn" data-mood="sad">😢<span>Sad vibes</span></button>
+        <button class="mood-btn" data-mood="party">🎉<span>Party</span></button>
+        <button class="mood-btn" data-mood="focus">🎯<span>Focus</span></button>
+        <button class="mood-btn" data-mood="dance">💃<span>Dance</span></button>
+      </div>
+    </div>
+  </div>
+
+  <!-- SHARE CARD MODAL -->
+  <div id="share-modal" class="modal hidden">
+    <div class="modal-box">
+      <div class="modal-header">
+        <h3>📸 Ta carte Vibify</h3>
+        <button id="close-share-btn" class="modal-close">✕</button>
+      </div>
+      <canvas id="share-canvas" class="share-canvas"></canvas>
+      <button id="download-share-btn" class="btn-primary" style="width:100%;margin-top:14px">⬇ Télécharger l'image</button>
+    </div>
+  </div>
+
+  <!-- LYRICS PANEL -->
+  <div id="lyrics-panel" class="lyrics-panel hidden">
+    <button id="lyrics-close-btn" class="lyrics-close-btn">✕</button>
+    <div id="lyrics-text" class="lyrics-text"></div>
   </div>
 
   <!-- MINI PLAYER -->

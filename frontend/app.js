@@ -716,6 +716,7 @@ async function importFromLastfm() {
     launchApp();
     renderTracks(library.liked);
     showToast(`✅ ${merged.length} titres importés depuis Last.fm !`);
+    startLastfmAutoSync(username.trim());
   } catch(e) {
     hideLoading();
     alert('Erreur Last.fm : ' + e.message);
@@ -1194,11 +1195,14 @@ function showMiniPlayer(track) {
   $('mini-player-artist').textContent = (track?.artists||[]).join(', ');
   $('mini-player-progress').style.width = '0%';
   $('mini-player').classList.remove('hidden');
+  fetchAndShowLyrics(track);
 }
 
 function hideMiniPlayer() {
   $('mini-player').classList.add('hidden');
   $('mini-player-progress').style.width = '0%';
+  $('lyrics-panel').classList.add('hidden');
+  currentLyricsTrack = null;
 }
 
 function clearSelection() {
@@ -2266,6 +2270,279 @@ function exportCsv() {
   a.click(); URL.revokeObjectURL(a.href);
 }
 
+// ── Vibify Wrapped ────────────────────────────────────────────
+function showWrapped() {
+  const all = [...library.liked, ...library.playlists.flatMap(p => p.items)];
+  if (!all.length) { showToast('Importe ta bibliothèque d\'abord !'); return; }
+
+  const artistCounts = {};
+  all.forEach(t => (t.artists||[]).forEach(a => { artistCounts[a] = (artistCounts[a]||0) + 1; }));
+  const topArtists = Object.entries(artistCounts).sort((a,b) => b[1]-a[1]).slice(0, 5);
+
+  const scrobbled = all.filter(t => t.scrobbles > 0).sort((a,b) => b.scrobbles-a.scrobbles).slice(0, 5);
+  const topTracks = scrobbled.length ? scrobbled : all.slice(0, 5);
+
+  const decades = {};
+  all.forEach(t => { if (t.year) { const d = Math.floor(t.year/10)*10; decades[d] = (decades[d]||0)+1; } });
+  const topDecade = Object.entries(decades).sort((a,b) => b[1]-a[1])[0];
+
+  const totalMs = all.reduce((s,t) => s+(t.duration_ms||0), 0);
+  const totalHours = Math.round(totalMs/3600000);
+  const totalDays  = Math.floor(totalMs/86400000);
+
+  const slides = [
+    { bg:'linear-gradient(160deg,#0d0d1a,#0a1628)', accent:'#1db954', emoji:'🎵',
+      title:'Ton année en musique', sub:'Voilà ce que Vibify a retenu de toi…', body:'' },
+    { bg:'linear-gradient(160deg,#0a1628,#1a0a28)', accent:'#3b82f6', emoji:'🎵',
+      title: all.length.toLocaleString('fr'), sub:'titres dans ta bibliothèque',
+      body:`<div class="wrapped-detail">C'est ${Math.round(all.length/10)*10} ambiances différentes 🎶</div>` },
+    { bg:'linear-gradient(160deg,#1a0a28,#28100a)', accent:'#f59e0b', emoji:'⏱️',
+      title: totalHours ? `${totalHours}h` : '—', sub:"d'écoute au total",
+      body: totalDays >= 1 ? `<div class="wrapped-detail">Soit ${totalDays} jour${totalDays>1?'s':''} non-stop 🔥</div>` : '' },
+    { bg:'linear-gradient(160deg,#0a1a10,#0d0d1a)', accent:'#1db954', emoji:'🎤',
+      title: topArtists[0]?.[0] || '—', sub:'ton artiste numéro 1',
+      body: topArtists.slice(1,5).map(([a],i) =>
+        `<div class="wrapped-rank"><span class="wrapped-rank-num">#${i+2}</span>${esc(a)}</div>`).join('') },
+    { bg:'linear-gradient(160deg,#28100a,#1a1000)', accent:'#ff6b6b', emoji:'🔥',
+      title:'Tes titres culte', sub:'',
+      body: topTracks.map((t,i) =>
+        `<div class="wrapped-rank"><span class="wrapped-rank-num">#${i+1}</span>${esc(t.name)} <span class="wrapped-rank-artist">— ${esc((t.artists||[])[0]||'')}</span></div>`).join('') },
+    { bg:'linear-gradient(160deg,#0a1828,#0d0d1a)', accent:'#60a5fa', emoji:'🕐',
+      title: topDecade ? `Années ${topDecade[0]}` : 'Intemporel',
+      sub: topDecade ? 'ta décennie de cœur' : 'tu traverses les époques', body:'' },
+    { bg:'linear-gradient(160deg,#0d0d1a,#0a1628)', accent:'#1db954', emoji:'✨',
+      title:'Vibify', sub:'Continue d\'écouter, de ressentir 🙏',
+      body:'<div class="wrapped-detail" style="margin-top:8px;font-size:.9rem;opacity:.5">vibify.app</div>' },
+  ];
+
+  let current = 0;
+  const old = document.getElementById('_wrapped_modal');
+  if (old) old.remove();
+  const box = document.createElement('div');
+  box.id = '_wrapped_modal';
+  box.className = 'modal';
+  box.style.background = 'rgba(0,0,0,.92)';
+  box.innerHTML = `
+    <div class="wrapped-box">
+      <button class="wrapped-close" id="_w_close">✕</button>
+      <div id="_w_slide" class="wrapped-slide"></div>
+      <div class="wrapped-nav">
+        <button id="_w_prev" class="wrapped-nav-btn">‹</button>
+        <div id="_w_dots" class="wrapped-dots"></div>
+        <button id="_w_next" class="wrapped-nav-btn">›</button>
+      </div>
+      <button id="_w_save" class="wrapped-share-btn">📸 Sauvegarder en image</button>
+    </div>`;
+  document.body.appendChild(box);
+
+  function renderSlide(idx) {
+    const s = slides[idx];
+    const slide = box.querySelector('#_w_slide');
+    slide.style.background = s.bg;
+    const content = document.createElement('div');
+    content.className = 'wrapped-content';
+    content.style.setProperty('--w-accent', s.accent);
+    content.innerHTML = `
+      <div class="wrapped-emoji">${s.emoji}</div>
+      <div class="wrapped-big">${s.title}</div>
+      ${s.sub ? `<div class="wrapped-sub">${s.sub}</div>` : ''}
+      <div class="wrapped-body">${s.body}</div>`;
+    slide.innerHTML = '';
+    slide.appendChild(content);
+    requestAnimationFrame(() => content.classList.add('wrapped-in'));
+
+    box.querySelector('#_w_dots').innerHTML =
+      slides.map((_,i) => `<div class="wrapped-dot${i===idx?' active':''}"></div>`).join('');
+    box.querySelector('#_w_prev').style.opacity = idx > 0 ? '1' : '0.2';
+    box.querySelector('#_w_next').textContent = idx === slides.length-1 ? '✓ Fermer' : '›';
+  }
+
+  renderSlide(0);
+  box.querySelector('#_w_prev').addEventListener('click', () => { if (current > 0) renderSlide(--current); });
+  box.querySelector('#_w_next').addEventListener('click', () => {
+    if (current < slides.length-1) renderSlide(++current);
+    else { box.remove(); document.removeEventListener('keydown', keyNav); }
+  });
+  box.querySelector('#_w_close').addEventListener('click', () => { box.remove(); document.removeEventListener('keydown', keyNav); });
+  box.querySelector('#_w_save').addEventListener('click', generateShareCard);
+  box.addEventListener('click', e => { if (e.target === box) { box.remove(); document.removeEventListener('keydown', keyNav); } });
+
+  function keyNav(e) {
+    if (e.key === 'ArrowRight' && current < slides.length-1) renderSlide(++current);
+    if (e.key === 'ArrowLeft'  && current > 0) renderSlide(--current);
+    if (e.key === 'Escape') { box.remove(); document.removeEventListener('keydown', keyNav); }
+  }
+  document.addEventListener('keydown', keyNav);
+}
+
+// ── Share Card ────────────────────────────────────────────────
+function generateShareCard() {
+  const all = [...library.liked, ...library.playlists.flatMap(p => p.items)];
+  if (!all.length) { showToast('Importe ta bibliothèque d\'abord !'); return; }
+
+  const artistCounts = {};
+  all.forEach(t => (t.artists||[]).forEach(a => { artistCounts[a] = (artistCounts[a]||0)+1; }));
+  const topArtists = Object.entries(artistCounts).sort((a,b) => b[1]-a[1]).slice(0, 3);
+  const totalMs    = all.reduce((s,t) => s+(t.duration_ms||0), 0);
+  const totalHours = Math.round(totalMs/3600000);
+
+  const canvas = $('share-canvas');
+  const W = 400, H = 520;
+  canvas.width = W; canvas.height = H;
+  const ctx = canvas.getContext('2d');
+
+  const bg = ctx.createLinearGradient(0, 0, W, H);
+  bg.addColorStop(0, '#090914'); bg.addColorStop(0.5, '#0b1a0b'); bg.addColorStop(1, '#140912');
+  ctx.fillStyle = bg; ctx.fillRect(0, 0, W, H);
+
+  const glow = ctx.createRadialGradient(W*.5, H*.28, 0, W*.5, H*.28, 220);
+  glow.addColorStop(0, 'rgba(29,185,84,.18)'); glow.addColorStop(1, 'transparent');
+  ctx.fillStyle = glow; ctx.fillRect(0, 0, W, H);
+
+  function roundedRect(x,y,w,h,r) {
+    ctx.beginPath(); ctx.moveTo(x+r,y); ctx.lineTo(x+w-r,y); ctx.arcTo(x+w,y,x+w,y+r,r);
+    ctx.lineTo(x+w,y+h-r); ctx.arcTo(x+w,y+h,x+w-r,y+h,r); ctx.lineTo(x+r,y+h);
+    ctx.arcTo(x,y+h,x,y+h-r,r); ctx.lineTo(x,y+r); ctx.arcTo(x,y,x+r,y,r); ctx.closePath();
+  }
+  ctx.strokeStyle = 'rgba(29,185,84,.3)'; ctx.lineWidth = 1.5;
+  roundedRect(4, 4, W-8, H-8, 20); ctx.stroke();
+
+  ctx.font = 'bold 26px system-ui,sans-serif'; ctx.fillStyle = '#1db954'; ctx.textAlign = 'center';
+  ctx.fillText('Vibify', W/2, 54);
+
+  ctx.strokeStyle = 'rgba(255,255,255,.07)'; ctx.lineWidth = 1;
+  ctx.beginPath(); ctx.moveTo(40,70); ctx.lineTo(W-40,70); ctx.stroke();
+
+  ctx.font = 'bold 80px system-ui,sans-serif'; ctx.fillStyle = '#fff';
+  ctx.fillText(all.length.toLocaleString('fr'), W/2, 165);
+  ctx.font = '15px system-ui,sans-serif'; ctx.fillStyle = 'rgba(255,255,255,.5)';
+  ctx.fillText('titres dans ma bibliothèque', W/2, 192);
+
+  const hg = ctx.createLinearGradient(0,220,W,220);
+  hg.addColorStop(0,'#1db954'); hg.addColorStop(1,'#00d4aa');
+  ctx.font = 'bold 34px system-ui,sans-serif'; ctx.fillStyle = hg;
+  ctx.fillText(`${totalHours}h d'écoute`, W/2, 248);
+
+  ctx.strokeStyle = 'rgba(255,255,255,.07)';
+  ctx.beginPath(); ctx.moveTo(40,268); ctx.lineTo(W-40,268); ctx.stroke();
+
+  ctx.font = 'bold 11px system-ui,sans-serif'; ctx.fillStyle = 'rgba(255,255,255,.3)';
+  ctx.fillText('TOP ARTISTES', W/2, 298);
+
+  topArtists.forEach(([a],i) => {
+    const sz = [22,17,14][i]; const al = [1,.75,.55][i];
+    ctx.font = `bold ${sz}px system-ui,sans-serif`;
+    ctx.fillStyle = i===0 ? '#fff' : `rgba(255,255,255,${al})`;
+    const maxW = W-80; let nm = a;
+    while (ctx.measureText(nm).width > maxW && nm.length > 3) nm = nm.slice(0,-1)+'…';
+    ctx.fillText(nm, W/2, 328+i*34);
+  });
+
+  ctx.font = '12px system-ui,sans-serif'; ctx.fillStyle = 'rgba(255,255,255,.22)';
+  ctx.fillText('vibify.app', W/2, H-20);
+
+  $('share-modal').classList.remove('hidden');
+  $('download-share-btn').onclick = () => {
+    Object.assign(document.createElement('a'), {
+      href: canvas.toDataURL('image/png'), download: 'vibify_card.png'
+    }).click();
+    showToast('📸 Carte téléchargée !');
+  };
+}
+
+// ── Lyrics ────────────────────────────────────────────────────
+let currentLyricsTrack = null;
+
+async function fetchAndShowLyrics(track) {
+  currentLyricsTrack = track;
+  const artist = (track?.artists||[])[0] || '';
+  const title  = track?.name || '';
+  if (!artist || !title) return;
+
+  const panel = $('lyrics-panel');
+  panel.classList.remove('hidden');
+  $('lyrics-text').innerHTML = '<div class="lyrics-loading">🎵 Chargement des paroles…</div>';
+
+  try {
+    const r = await fetch(`/api/v1/lyrics?artist=${encodeURIComponent(artist)}&title=${encodeURIComponent(title)}`);
+    const data = await r.json();
+    if (data.lyrics) {
+      $('lyrics-text').innerHTML = `<pre class="lyrics-content">${esc(data.lyrics)}</pre>`;
+    } else {
+      $('lyrics-text').innerHTML = '<div class="lyrics-loading">Paroles introuvables 😔</div>';
+      setTimeout(() => { if (currentLyricsTrack === track) panel.classList.add('hidden'); }, 2000);
+    }
+  } catch {
+    $('lyrics-text').innerHTML = '<div class="lyrics-loading">Erreur de chargement</div>';
+  }
+}
+
+// ── Mood Picker ───────────────────────────────────────────────
+function showMoodPicker() {
+  if (!library.liked.length) { showToast('Charge ta bibliothèque d\'abord !'); return; }
+  $('mood-modal').classList.remove('hidden');
+}
+
+function applyMood(mood) {
+  $('mood-modal').classList.add('hidden');
+  const base = allTracks.length ? allTracks : library.liked;
+  const hasAudio = base.some(t => t.energy != null);
+
+  const filters = {
+    hype:  t => (t.energy||0) > 0.65 && (t.valence||0) > 0.5,
+    chill: t => (t.energy||0) < 0.45,
+    sad:   t => (t.valence||0.5) < 0.35,
+    party: t => (t.danceability||0) > 0.7 && (t.energy||0) > 0.6,
+    focus: t => (t.energy||0) >= 0.3 && (t.energy||0) <= 0.6 && (t.speechiness||0) < 0.1,
+    dance: t => (t.danceability||0) > 0.65,
+  };
+  const names = { hype:'🔥 Hype', chill:'😌 Chill', sad:'😢 Sad vibes', party:'🎉 Party', focus:'🎯 Focus', dance:'💃 Dance' };
+
+  let filtered = hasAudio ? base.filter(filters[mood]) : [];
+  if (filtered.length < 5) {
+    filtered = [...base].sort(() => Math.random() - .5);
+    showToast('🎲 Shuffle — importe ton ZIP Spotify pour le filtre par humeur précis');
+  } else {
+    showToast(`${names[mood]} — ${filtered.length} titres`);
+  }
+
+  renderTracks(filtered);
+  $('playlist-title').textContent = names[mood] || 'Mood';
+  $('tracks-count').textContent   = `${filtered.length} titre${filtered.length>1?'s':''}`;
+}
+
+// ── Last.fm Auto-sync ─────────────────────────────────────────
+const LASTFM_USER_KEY = 'vibify_lastfm_user';
+let lastfmSyncInterval = null;
+
+function startLastfmAutoSync(username) {
+  if (!username) return;
+  localStorage.setItem(LASTFM_USER_KEY, username);
+  clearInterval(lastfmSyncInterval);
+  lastfmSyncInterval = setInterval(() => silentLastfmSync(username), 5 * 60 * 1000);
+}
+
+async function silentLastfmSync(username) {
+  try {
+    const r = await fetch(`/api/v1/lastfm/recent?username=${encodeURIComponent(username)}&limit=50`);
+    if (!r.ok) return;
+    const fresh = await r.json();
+    const existingIds = new Set(library.liked.map(t => t.id));
+    const added = fresh.filter(t => !existingIds.has(t.id));
+    if (added.length) {
+      library.liked = [...added, ...library.liked];
+      saveToStorage();
+      renderSidebar();
+      showToast(`🔄 +${added.length} nouveau${added.length>1?'x':''} titre${added.length>1?'s':''} Last.fm`);
+    }
+  } catch {}
+}
+
+function resumeLastfmAutoSync() {
+  const u = localStorage.getItem(LASTFM_USER_KEY);
+  if (u) startLastfmAutoSync(u);
+}
+
 // ── Keyboard shortcuts ────────────────────────────────────────
 function initKeyboard() {
   document.addEventListener('keydown', e => {
@@ -2488,6 +2765,29 @@ document.addEventListener('DOMContentLoaded', () => {
   $('search-select-all-btn').addEventListener('click', searchSelectAll);
 
   $('close-stats-btn').addEventListener('click', () => $('stats-modal').classList.add('hidden'));
+
+  // Wrapped
+  $('wrapped-btn').addEventListener('click', showWrapped);
+
+  // Share card
+  $('share-btn').addEventListener('click', generateShareCard);
+  $('close-share-btn').addEventListener('click', () => $('share-modal').classList.add('hidden'));
+
+  // Mood picker
+  $('mood-btn').addEventListener('click', showMoodPicker);
+  $('close-mood-btn').addEventListener('click', () => $('mood-modal').classList.add('hidden'));
+  document.querySelectorAll('.mood-btn').forEach(btn =>
+    btn.addEventListener('click', () => applyMood(btn.dataset.mood))
+  );
+
+  // Lyrics panel
+  $('lyrics-close-btn').addEventListener('click', () => {
+    $('lyrics-panel').classList.add('hidden');
+    currentLyricsTrack = null;
+  });
+
+  // Last.fm auto-sync resume
+  resumeLastfmAutoSync();
 
   $('mini-player-btn').addEventListener('click', () => {
     if (!currentAudio) return;
