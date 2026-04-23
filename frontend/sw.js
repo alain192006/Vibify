@@ -1,5 +1,5 @@
 'use strict';
-const CACHE = 'vibify-v1';
+const CACHE = 'vibify-v3';
 const PRECACHE = ['/', '/static/style.css', '/static/app.js', '/static/manifest.json'];
 
 self.addEventListener('install', e => {
