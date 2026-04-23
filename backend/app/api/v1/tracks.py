@@ -18,6 +18,7 @@ def _format_track(track: dict) -> dict:
         "uri": track.get("uri"),
         "duration_ms": track.get("duration_ms"),
         "image": images[0]["url"] if images else None,
+        "preview_url": track.get("preview_url"),
     }
 
 
