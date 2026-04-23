@@ -1233,10 +1233,10 @@ function showStats() {
     })()}
     ${(() => {
       // Ratings distribution
-      const rated = all.filter(t => t.uri && ratings[t.uri]);
+      const rated = all.filter(t => t.uri && trackRatings[t.uri]);
       if (!rated.length) return '';
       const dist = {1:0,2:0,3:0,4:0,5:0};
-      rated.forEach(t => dist[ratings[t.uri]]++);
+      rated.forEach(t => dist[trackRatings[t.uri]]++);
       const maxR = Math.max(...Object.values(dist));
       return `<div class="stat-section-title" style="margin-top:14px">Distribution des notes (${rated.length} notés)</div>
       <div class="top-list">
