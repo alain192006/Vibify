@@ -590,6 +590,101 @@ function addSearchToLibrary() {
   showToast(`✅ ${newTracks.length} titre${newTracks.length > 1 ? 's' : ''} ajouté${newTracks.length > 1 ? 's' : ''} !`);
 }
 
+// ── Recommandations ──────────────────────────────────────────
+let recoResults = [];
+
+async function showRecommendations() {
+  $('reco-modal').classList.remove('hidden');
+  $('reco-results').innerHTML = '<div class="empty-state">✨ Analyse de ta bibliothèque…</div>';
+  $('reco-actions').classList.add('hidden');
+
+  const all = [...(library.liked||[]), ...library.playlists.flatMap(p => p.items)];
+  if (!all.length) {
+    $('reco-results').innerHTML = '<div class="empty-state">Ajoute d\'abord des titres à ta bibliothèque</div>';
+    return;
+  }
+
+  // Top 5 artistes
+  const artistCounts = {};
+  all.forEach(t => (t.artists||[]).forEach(a => { if (a) artistCounts[a] = (artistCounts[a]||0)+1; }));
+  const topArtists = Object.entries(artistCounts).sort((a,b)=>b[1]-a[1]).slice(0,5).map(e=>e[0]);
+  $('reco-subtitle').textContent = `Basé sur : ${topArtists.slice(0,3).join(', ')}…`;
+
+  const existingIds = new Set(all.map(t => t.uri || t.id).filter(Boolean));
+  recoResults = [];
+
+  try {
+    for (const artist of topArtists) {
+      const r = await fetch(`/api/v1/tracks/search?q=${encodeURIComponent(artist)}&limit=8`,
+        spotifyToken ? { headers: { 'Authorization': `Bearer ${spotifyToken}` } } : {});
+      if (!r.ok) continue;
+      const tracks = await r.json();
+      tracks.forEach(t => {
+        const key = t.uri || t.id;
+        if (key && !existingIds.has(key) && !recoResults.find(r => (r.uri||r.id) === key)) {
+          recoResults.push(t);
+          existingIds.add(key);
+        }
+      });
+    }
+    // Mélange pour varier
+    recoResults = recoResults.sort(() => Math.random() - 0.5).slice(0, 25);
+    renderRecoResults();
+  } catch(e) {
+    $('reco-results').innerHTML = `<div class="empty-state">❌ ${e.message}</div>`;
+  }
+}
+
+function renderRecoResults() {
+  if (!recoResults.length) {
+    $('reco-results').innerHTML = '<div class="empty-state">Aucune recommandation trouvée</div>';
+    return;
+  }
+  $('reco-results').innerHTML = recoResults.map((t, i) => {
+    const artists = (t.artists||[]).join(', ');
+    const color = cardColor(t.name + artists);
+    return `<div class="search-result-row" data-idx="${i}">
+      <input type="checkbox" class="search-check reco-check" data-idx="${i}">
+      <div class="track-img-wrap">
+        ${t.image ? `<img class="track-img" src="${esc(t.image)}" alt="" loading="lazy">` : `<div class="track-placeholder" style="background:${color}">🎵</div>`}
+      </div>
+      <div style="flex:1;min-width:0">
+        <div class="track-name">${esc(t.name)}</div>
+        <div class="track-artist">${esc(artists)}</div>
+      </div>
+      <div class="track-col" style="font-size:.8rem;color:var(--muted)">${esc(t.album||'')}</div>
+      <div class="track-dur"><span>${fmtDuration(t.duration_ms)}</span></div>
+    </div>`;
+  }).join('');
+  $('reco-results').querySelectorAll('.search-result-row').forEach(row => {
+    const cb = row.querySelector('.reco-check');
+    row.addEventListener('click', e => { if (e.target === cb) return; cb.checked = !cb.checked; row.classList.toggle('selected', cb.checked); });
+    cb.addEventListener('change', () => row.classList.toggle('selected', cb.checked));
+  });
+  $('reco-actions').classList.remove('hidden');
+}
+
+function recoSelectAll() {
+  const rows = $('reco-results').querySelectorAll('.search-result-row');
+  const allOn = [...rows].every(r => r.querySelector('.reco-check').checked);
+  rows.forEach(row => { const cb = row.querySelector('.reco-check'); cb.checked = !allOn; row.classList.toggle('selected', !allOn); });
+}
+
+function addRecoToLibrary() {
+  const checked = [...$('reco-results').querySelectorAll('.reco-check:checked')];
+  if (!checked.length) { showToast('Sélectionne des titres d\'abord'); return; }
+  const tracks = checked.map(cb => recoResults[parseInt(cb.dataset.idx)]);
+  if (!library.liked) library.liked = [];
+  const existing = new Set(library.liked.map(t => t.uri || t.id).filter(Boolean));
+  const newTracks = tracks.filter(t => { const k = t.uri||t.id; return k && !existing.has(k); });
+  library.liked.push(...newTracks);
+  saveToStorage();
+  allTracks = [...allTracks, ...newTracks];
+  renderTracks(allTracks);
+  $('reco-modal').classList.add('hidden');
+  showToast(`✅ ${newTracks.length} titre${newTracks.length>1?'s':''} ajouté${newTracks.length>1?'s':''}  !`);
+}
+
 // ── Import depuis Spotify ─────────────────────────────────────
 let pendingSpotifyImport = false;
 
@@ -2303,6 +2398,11 @@ document.addEventListener('DOMContentLoaded', () => {
 
   $('search-music-btn').addEventListener('click', openSearchModal);
   $('search-toolbar-btn').addEventListener('click', openSearchModal);
+  $('reco-btn').addEventListener('click', showRecommendations);
+  $('close-reco-btn').addEventListener('click', () => $('reco-modal').classList.add('hidden'));
+  $('reco-add-btn').addEventListener('click', addRecoToLibrary);
+  $('reco-select-all-btn').addEventListener('click', recoSelectAll);
+  $('reco-refresh-btn').addEventListener('click', showRecommendations);
   $('close-search-btn').addEventListener('click', () => $('search-modal').classList.add('hidden'));
   $('search-modal-btn').addEventListener('click', runSearch);
   $('search-modal-input').addEventListener('keydown', e => { if (e.key === 'Enter') runSearch(); });

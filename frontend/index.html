@@ -186,6 +186,7 @@
             <button id="split-btn"   class="btn-icon">✂️ Diviser</button>
             <button id="dup-btn"     class="btn-outline-sm">🔍 Doublons</button>
             <button id="search-toolbar-btn" class="btn-outline-sm">🔎 Chercher</button>
+            <button id="reco-btn" class="btn-outline-sm">✨ Pour toi</button>
           </div>
         </div>
 
@@ -278,6 +279,23 @@
         <button id="close-stats-btn" class="modal-close">✕</button>
       </div>
       <div id="stats-body"></div>
+    </div>
+  </div>
+
+  <!-- RECO MODAL -->
+  <div id="reco-modal" class="modal hidden">
+    <div class="modal-box modal-wide">
+      <div class="modal-header">
+        <h3>✨ Recommandations pour toi</h3>
+        <button id="close-reco-btn" class="modal-close">✕</button>
+      </div>
+      <p id="reco-subtitle" class="modal-info"></p>
+      <div id="reco-results" class="search-results-list"></div>
+      <div id="reco-actions" class="search-modal-actions hidden">
+        <button id="reco-add-btn" class="btn-primary">＋ Ajouter à ma bibliothèque</button>
+        <button id="reco-select-all-btn" class="btn-outline-sm">Tout sélectionner</button>
+        <button id="reco-refresh-btn" class="btn-secondary">🔄 Rafraîchir</button>
+      </div>
     </div>
   </div>
 
