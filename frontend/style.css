@@ -1162,26 +1162,26 @@ select option { background: #161620; color: #fff; }
 .top-name, .top-count { color: rgba(255,255,255,.75) !important; }
 .stat-section-title { color: rgba(255,255,255,.4) !important; }
 
-/* ── Toolbar buttons — horizontal scroll, never wrap ── */
+/* ── Toolbar — wrap sur 2 lignes, hauteur auto ── */
 .toolbar {
-  flex-wrap: nowrap !important;
+  flex-wrap: wrap !important;
+  align-items: flex-start !important;
   padding: 10px 16px !important;
-  gap: 12px !important;
-  overflow: hidden !important;
+  gap: 8px !important;
+  height: auto !important;
+  min-height: auto !important;
+  overflow: visible !important;
+  position: relative !important;
+  z-index: 5 !important;
 }
-.toolbar > div:first-child { flex-shrink: 0 !important; min-width: 120px; max-width: 200px; }
+.toolbar > div:first-child { flex-shrink: 0 !important; min-width: 140px; }
 .toolbar-btns {
-  flex: 1 !important;
-  min-width: 0 !important;
-  overflow-x: auto !important;
-  overflow-y: visible !important;
-  flex-wrap: nowrap !important;
+  display: flex !important;
+  flex-wrap: wrap !important;
   gap: 5px !important;
-  scrollbar-width: none !important;
-  -ms-overflow-style: none !important;
-  padding-bottom: 2px;
+  align-items: center !important;
+  overflow: visible !important;
 }
-.toolbar-btns::-webkit-scrollbar { display: none !important; }
 .toolbar-btns .btn-icon,
 .toolbar-btns .btn-outline-sm {
   flex-shrink: 0 !important;
@@ -1189,6 +1189,9 @@ select option { background: #161620; color: #fff; }
   font-size: .75rem !important;
   padding: 5px 10px !important;
 }
+
+/* Filters panel en dessous du toolbar */
+.filters-panel { position: relative !important; z-index: 4 !important; }
 
 /* ── Filters — horizontal scroll on small screens ── */
 .filter-row {
