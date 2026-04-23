@@ -51,6 +51,15 @@ async def audio_features(body: EnrichBody):
         return []
 
 
+@router.get("/search")
+async def search(q: str, limit: int = 20):
+    try:
+        tracks = await sp.search_tracks(q, min(limit, 50))
+        return [_format_track(t) for t in tracks]
+    except Exception as e:
+        raise HTTPException(400, str(e))
+
+
 @router.post("/enrich")
 async def enrich_tracks(body: EnrichBody):
     try:

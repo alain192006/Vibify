@@ -505,6 +505,87 @@ async function enrichAudioFeatures(ids, uriMap) {
   } catch {}
 }
 
+// ── Recherche Spotify ─────────────────────────────────────────
+let searchResults = [];
+
+function openSearchModal() {
+  $('search-modal').classList.remove('hidden');
+  $('search-results').innerHTML = '';
+  $('search-actions').classList.add('hidden');
+  $('search-modal-input').value = '';
+  setTimeout(() => $('search-modal-input').focus(), 60);
+}
+
+async function runSearch() {
+  const q = $('search-modal-input').value.trim();
+  if (!q) return;
+  $('search-results').innerHTML = '<div class="empty-state">🔎 Recherche en cours…</div>';
+  $('search-actions').classList.add('hidden');
+  try {
+    const r = await fetch(`/api/v1/tracks/search?q=${encodeURIComponent(q)}&limit=20`);
+    if (!r.ok) throw new Error('Erreur serveur');
+    searchResults = await r.json();
+    renderSearchResults();
+  } catch (e) {
+    $('search-results').innerHTML = `<div class="empty-state">❌ ${e.message}</div>`;
+  }
+}
+
+function renderSearchResults() {
+  if (!searchResults.length) {
+    $('search-results').innerHTML = '<div class="empty-state">Aucun résultat</div>'; return;
+  }
+  $('search-results').innerHTML = searchResults.map((t, i) => {
+    const artists = (t.artists || []).join(', ');
+    const color = cardColor(t.name + artists);
+    return `<div class="search-result-row" data-idx="${i}">
+      <input type="checkbox" class="search-check track-check" data-idx="${i}">
+      <div class="track-img-wrap">
+        ${t.image ? `<img class="track-img" src="${esc(t.image)}" alt="" loading="lazy">` : `<div class="track-placeholder" style="background:${color}">🎵</div>`}
+      </div>
+      <div style="flex:1;min-width:0">
+        <div class="track-name">${esc(t.name)}</div>
+        <div class="track-artist">${esc(artists)}</div>
+      </div>
+      <div class="track-col" style="font-size:.8rem;color:var(--muted)">${esc(t.album || '')}</div>
+      <div class="track-dur"><span>${fmtDuration(t.duration_ms)}</span></div>
+    </div>`;
+  }).join('');
+
+  $('search-results').querySelectorAll('.search-result-row').forEach(row => {
+    const cb = row.querySelector('.search-check');
+    row.addEventListener('click', e => { if (e.target === cb) return; cb.checked = !cb.checked; row.classList.toggle('selected', cb.checked); });
+    cb.addEventListener('change', () => row.classList.toggle('selected', cb.checked));
+  });
+  $('search-actions').classList.remove('hidden');
+}
+
+function searchSelectAll() {
+  const rows = $('search-results').querySelectorAll('.search-result-row');
+  const allOn = [...rows].every(r => r.querySelector('.search-check').checked);
+  rows.forEach(row => { const cb = row.querySelector('.search-check'); cb.checked = !allOn; row.classList.toggle('selected', !allOn); });
+}
+
+function addSearchToLibrary() {
+  const checked = [...$('search-results').querySelectorAll('.search-check:checked')];
+  if (!checked.length) { showToast('Sélectionne des titres d\'abord'); return; }
+  const tracks = checked.map(cb => searchResults[parseInt(cb.dataset.idx)]);
+  if (!library.liked) library.liked = [];
+  const existing = new Set(library.liked.map(t => t.uri));
+  const newTracks = tracks.filter(t => t.uri && !existing.has(t.uri));
+  library.liked.push(...newTracks);
+  saveToStorage();
+  if (!$('app-screen').classList.contains('hidden')) {
+    allTracks = [...allTracks, ...newTracks];
+    renderTracks(allTracks);
+  } else {
+    launchApp();
+    renderTracks(library.liked);
+  }
+  $('search-modal').classList.add('hidden');
+  showToast(`✅ ${newTracks.length} titre${newTracks.length > 1 ? 's' : ''} ajouté${newTracks.length > 1 ? 's' : ''} !`);
+}
+
 // ── Import depuis Spotify ─────────────────────────────────────
 let pendingSpotifyImport = false;
 
@@ -2137,6 +2218,14 @@ document.addEventListener('DOMContentLoaded', () => {
     btn.addEventListener('click', () => computeSplit(btn.dataset.by))
   );
   $('split-spotify-btn').addEventListener('click', splitToSpotify);
+
+  $('search-music-btn').addEventListener('click', openSearchModal);
+  $('search-toolbar-btn').addEventListener('click', openSearchModal);
+  $('close-search-btn').addEventListener('click', () => $('search-modal').classList.add('hidden'));
+  $('search-modal-btn').addEventListener('click', runSearch);
+  $('search-modal-input').addEventListener('keydown', e => { if (e.key === 'Enter') runSearch(); });
+  $('search-add-lib-btn').addEventListener('click', addSearchToLibrary);
+  $('search-select-all-btn').addEventListener('click', searchSelectAll);
 
   $('close-stats-btn').addEventListener('click', () => $('stats-modal').classList.add('hidden'));
   $('close-export-btn').addEventListener('click', () => $('export-modal').classList.add('hidden'));

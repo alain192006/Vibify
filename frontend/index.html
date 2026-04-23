@@ -84,6 +84,9 @@
         </div>
         <p id="import-error" class="import-error hidden"></p>
         <div class="demo-divider"><span>ou</span></div>
+        <button id="search-music-btn" class="btn-primary btn-spotify-import">🔍 Chercher de la musique</button>
+        <p class="spotify-import-hint">Recherche des artistes et titres directement — sans ZIP</p>
+        <div class="demo-divider"><span>ou</span></div>
         <button id="spotify-import-btn" class="btn-spotify btn-spotify-import">🎵 Importer depuis Spotify</button>
         <p class="spotify-import-hint">Connecte ton compte et importe tout en un clic — sans ZIP</p>
         <div class="demo-divider"><span>ou</span></div>
@@ -182,6 +185,7 @@
             <button id="coh-btn"     class="btn-icon">🎯 Cohérence</button>
             <button id="split-btn"   class="btn-icon">✂️ Diviser</button>
             <button id="dup-btn"     class="btn-outline-sm">🔍 Doublons</button>
+            <button id="search-toolbar-btn" class="btn-outline-sm">🔎 Chercher</button>
           </div>
         </div>
 
@@ -441,6 +445,25 @@
       <div id="split-actions" class="split-actions hidden">
         <button id="split-spotify-btn" class="btn-spotify">🎵 Créer toutes sur Spotify</button>
         <span id="split-spotify-status"></span>
+      </div>
+    </div>
+  </div>
+
+  <!-- SEARCH MODAL -->
+  <div id="search-modal" class="modal hidden">
+    <div class="modal-box modal-wide">
+      <div class="modal-header">
+        <h3>🔍 Rechercher de la musique</h3>
+        <button id="close-search-btn" class="modal-close">✕</button>
+      </div>
+      <div class="search-modal-bar">
+        <input type="text" id="search-modal-input" class="search-input" placeholder="Artiste, titre, album…" style="flex:1">
+        <button id="search-modal-btn" class="btn-primary">Rechercher</button>
+      </div>
+      <div id="search-results" class="search-results-list"></div>
+      <div id="search-actions" class="search-modal-actions hidden">
+        <button id="search-add-lib-btn" class="btn-secondary">＋ Ajouter à ma bibliothèque</button>
+        <button id="search-select-all-btn" class="btn-outline-sm">Tout sélectionner</button>
       </div>
     </div>
   </div>

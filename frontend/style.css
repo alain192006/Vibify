@@ -805,3 +805,12 @@ body.dj-active .float-bar { bottom: var(--dj-h); }
 .split-total  { color: var(--muted); font-size: .82rem; margin-top: 10px; text-align: right; }
 .split-actions { display: flex; align-items: center; gap: 12px; margin-top: 14px; padding-top: 14px; border-top: 1px solid var(--border); }
 #split-spotify-status { font-size: .82rem; color: var(--muted); }
+
+/* Search modal */
+.search-modal-bar { display: flex; gap: 8px; margin-bottom: 14px; }
+.search-results-list { display: flex; flex-direction: column; gap: 6px; max-height: 360px; overflow-y: auto; padding-right: 4px; }
+.search-result-row { display: flex; align-items: center; gap: 12px; padding: 8px 12px; background: var(--bg3); border-radius: 10px; cursor: pointer; transition: background .15s; }
+.search-result-row:hover { background: var(--bg-hover); }
+.search-result-row.selected { background: color-mix(in srgb, var(--accent) 18%, var(--bg3)); outline: 1.5px solid var(--accent); }
+.search-check { width: 16px; height: 16px; accent-color: var(--accent); cursor: pointer; flex-shrink: 0; }
+.search-modal-actions { display: flex; gap: 10px; align-items: center; margin-top: 12px; padding-top: 12px; border-top: 1px solid var(--border); }
