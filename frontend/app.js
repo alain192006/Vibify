@@ -523,7 +523,7 @@ async function runSearch() {
   $('search-actions').classList.add('hidden');
   try {
     const r = await fetch(`/api/v1/tracks/search?q=${encodeURIComponent(q)}&limit=20`);
-    if (!r.ok) throw new Error('Erreur serveur');
+    if (!r.ok) { const err = await r.json().catch(() => ({})); throw new Error(err.detail || `Erreur ${r.status}`); }
     searchResults = await r.json();
     renderSearchResults();
   } catch (e) {
