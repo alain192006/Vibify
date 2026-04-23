@@ -1167,10 +1167,14 @@ select option { background: #161620; color: #fff; }
   flex-wrap: nowrap !important;
   padding: 10px 16px !important;
   gap: 12px !important;
+  overflow: hidden !important;
 }
-.toolbar > div:first-child { flex-shrink: 0; min-width: 0; }
+.toolbar > div:first-child { flex-shrink: 0 !important; min-width: 120px; max-width: 200px; }
 .toolbar-btns {
+  flex: 1 !important;
+  min-width: 0 !important;
   overflow-x: auto !important;
+  overflow-y: visible !important;
   flex-wrap: nowrap !important;
   gap: 5px !important;
   scrollbar-width: none !important;
