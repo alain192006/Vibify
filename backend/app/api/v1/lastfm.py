@@ -23,13 +23,21 @@ async def _lastfm(method: str, params: dict) -> dict:
         return data
 
 
+def _artist_name(track: dict) -> str:
+    a = track.get("artist", {})
+    if isinstance(a, dict):
+        return a.get("name") or a.get("#text", "")
+    return str(a)
+
+
 def _fmt(track: dict, source: str = "") -> dict:
     img = track.get("image", [])
-    image_url = next((i["#text"] for i in reversed(img) if i.get("#text")), None)
+    image_url = next((i.get("#text") for i in reversed(img) if i.get("#text")), None)
+    artist = _artist_name(track)
     return {
-        "id": f"lfm_{track.get('mbid') or track.get('name','')}_{track.get('artist',{}).get('name','') if isinstance(track.get('artist'), dict) else track.get('artist','')}",
+        "id": f"lfm_{track.get('mbid') or track.get('name','')}_{artist}",
         "name": track.get("name", ""),
-        "artists": [track["artist"]["name"] if isinstance(track.get("artist"), dict) else track.get("artist", "")],
+        "artists": [artist],
         "album": track.get("album", {}).get("#text", "") if isinstance(track.get("album"), dict) else "",
         "uri": None,
         "duration_ms": int(track.get("duration", 0) or 0) * 1000 or None,
