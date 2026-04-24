@@ -2718,7 +2718,13 @@ document.addEventListener('DOMContentLoaded', () => {
   $('mosaic-btn').addEventListener('click', generateMosaic);
   $('close-mosaic-btn').addEventListener('click', () => $('mosaic-modal').classList.add('hidden'));
 
-  $('flow-btn').addEventListener('click', () => $('flow-menu').classList.toggle('hidden'));
+  $('flow-btn').addEventListener('click', () => {
+    const menu = $('flow-menu');
+    const rect = $('flow-btn').getBoundingClientRect();
+    menu.style.top  = (rect.bottom + 6) + 'px';
+    menu.style.left = rect.left + 'px';
+    menu.classList.toggle('hidden');
+  });
   document.querySelectorAll('#flow-menu button').forEach(btn => {
     btn.addEventListener('click', () => { autoFlow(btn.dataset.mode); $('flow-menu').classList.add('hidden'); });
   });

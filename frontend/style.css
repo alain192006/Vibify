@@ -626,7 +626,7 @@ body.dj-active .float-bar { bottom: var(--dj-h); }
 /* ── Flow dropdown ── */
 .flow-wrap { position: relative; }
 .flow-menu {
-  position: absolute; top: calc(100% + 6px); left: 0; z-index: 100;
+  position: fixed; z-index: 9999;
   background: var(--bg2); border: 1px solid var(--border); border-radius: 10px;
   padding: 6px; display: flex; flex-direction: column; gap: 2px; min-width: 220px;
   box-shadow: 0 8px 24px rgba(0,0,0,.4); animation: fadeUp .15s ease;
