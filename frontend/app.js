@@ -1794,18 +1794,19 @@ async function generateMosaic() {
 // ── Auto Flow ─────────────────────────────────────────────────
 function autoFlow(mode) {
   let tracks = [...(currentFiltered.length ? currentFiltered : allTracks)];
-  if (tracks.filter(t => t.energy != null).length < 3) { alert('Pas assez de données audio — charge ta lib et attends l\'enrichissement.'); return; }
-  if (mode === 'ascending')  tracks.sort((a,b) => (a.energy||0)-(b.energy||0));
-  if (mode === 'descending') tracks.sort((a,b) => (b.energy||0)-(a.energy||0));
-  if (mode === 'bpm')        tracks.sort((a,b) => (a.tempo||0)-(b.tempo||0));
+  const hasAudio = tracks.filter(t => t.energy != null).length >= 3;
+
+  if (mode === 'ascending')  tracks.sort((a,b) => hasAudio ? (a.energy||0)-(b.energy||0) : (b.scrobbles||0)-(a.scrobbles||0));
+  if (mode === 'descending') tracks.sort((a,b) => hasAudio ? (b.energy||0)-(a.energy||0) : (a.scrobbles||0)-(b.scrobbles||0));
+  if (mode === 'bpm')        tracks.sort((a,b) => hasAudio ? (a.tempo||0)-(b.tempo||0) : (a.name||'').localeCompare(b.name||''));
   if (mode === 'wave') {
-    tracks.sort((a,b) => (a.energy||0)-(b.energy||0));
+    tracks.sort((a,b) => hasAudio ? (a.energy||0)-(b.energy||0) : (b.scrobbles||0)-(a.scrobbles||0));
     const res = []; let lo = 0, hi = tracks.length-1;
     while (lo <= hi) { res.length%2===0 ? res.push(tracks[lo++]) : res.push(tracks[hi--]); }
     tracks = res;
   }
   renderTracks(tracks);
-  const labels = {ascending:'⬆ Énergie croissante', descending:'⬇ Énergie décroissante', wave:'〰 Vague', bpm:'🥁 BPM croissant'};
+  const labels = {ascending: hasAudio?'⬆ Énergie croissante':'⬆ Plus écoutés', descending: hasAudio?'⬇ Énergie décroissante':'⬇ Moins écoutés', wave:'〰 Vague', bpm: hasAudio?'🥁 BPM croissant':'🔤 Alphabétique'};
   showToast(`🌊 Flow ${labels[mode]} appliqué`);
 }
 
@@ -2721,9 +2722,13 @@ document.addEventListener('DOMContentLoaded', () => {
   $('flow-btn').addEventListener('click', () => {
     const menu = $('flow-menu');
     const rect = $('flow-btn').getBoundingClientRect();
-    menu.style.top  = (rect.bottom + 6) + 'px';
-    menu.style.left = rect.left + 'px';
     menu.classList.toggle('hidden');
+    if (!menu.classList.contains('hidden')) {
+      menu.style.top  = (rect.bottom + 6) + 'px';
+      const menuW = 230;
+      const left = Math.min(rect.left, window.innerWidth - menuW - 8);
+      menu.style.left = Math.max(8, left) + 'px';
+    }
   });
   document.querySelectorAll('#flow-menu button').forEach(btn => {
     btn.addEventListener('click', () => { autoFlow(btn.dataset.mode); $('flow-menu').classList.add('hidden'); });
