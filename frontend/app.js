@@ -1158,7 +1158,7 @@ async function _processArtQueue() {
     const key = `${artist}|${title}`;
     if (_artCache.has(key)) {
       const url = _artCache.get(key);
-      if (url && el.isConnected) _applyArtwork(el, url);
+      if (url && el.isConnected) _applyArtwork(el, url, artist, title);
       continue;
     }
     try {
@@ -1166,20 +1166,26 @@ async function _processArtQueue() {
       const data = await r.json();
       const url = data.url || null;
       _artCache.set(key, url);
-      if (url && el.isConnected) _applyArtwork(el, url);
+      if (url && el.isConnected) _applyArtwork(el, url, artist, title);
     } catch { _artCache.set(key, null); }
   }
   _artWorkers--;
 }
 
-function _applyArtwork(el, url) {
+let _artSaveTimer = null;
+
+function _applyArtwork(el, url, artist, title) {
   const img = document.createElement('img');
   img.src = url;
   img.alt = '';
-  img.loading = 'lazy';
   img.onerror = () => img.remove();
   img.className = el.classList.contains('card-emoji') ? 'card-img' : 'track-img';
   el.replaceWith(img);
+  // Persist URL into track objects so next load shows images immediately
+  const update = t => (t.artists||[])[0] === artist && t.name === title;
+  [...(library.liked||[]), ...library.playlists.flatMap(p=>p.items)].filter(update).forEach(t => { t.image = url; });
+  clearTimeout(_artSaveTimer);
+  _artSaveTimer = setTimeout(saveToStorage, 2000);
 }
 
 function attachToggle(el, cb, t) {
