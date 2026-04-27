@@ -392,7 +392,7 @@ async function handleFiles(fileList) {
         for (const [path, entry] of Object.entries(zip.files)) {
           if (entry.dir) continue;
           const basename = path.split('/').pop();
-          if (basename === 'YourLibrary.json' || /^Playlist\d+\.json$/i.test(basename) || /^StreamingHistory_music_\d+\.json$/i.test(basename)) {
+          if (basename === 'YourLibrary.json' || /^Playlist\d+\.json$/i.test(basename) || /^StreamingHistory/i.test(basename) || /^Streaming_History/i.test(basename) || /^endsong_\d+\.json$/i.test(basename)) {
             jsonEntries.push({ name: basename, content: await entry.async('string') });
           }
         }
@@ -417,9 +417,9 @@ async function handleFiles(fileList) {
         }));
         found = true;
       }
-    } else if (/^StreamingHistory_music_\d+\.json$/i.test(name)) {
+    } else if (/^StreamingHistory/i.test(name) || /^Streaming_History/i.test(name) || /^endsong_\d+\.json$/i.test(name)) {
       if (Array.isArray(json)) {
-        streamingHistory.push(...json.filter(e => e.master_metadata_track_name));
+        streamingHistory.push(...json.filter(e => e.master_metadata_track_name || e.trackName));
         found = true;
       }
     } else if (/^Playlist\d+\.json$/i.test(name)) {
